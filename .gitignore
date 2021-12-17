@@ -1,0 +1,5 @@
+__pycache__
+dataset/ztl
+dataset/CUFED
+*.pt
+test/demo/output/
