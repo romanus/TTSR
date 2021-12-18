@@ -65,9 +65,9 @@ class ToTensor(object):
 
 class TrainSet(Dataset):
     def __init__(self, args, transform=transforms.Compose([RandomFlip(), RandomRotate(), ToTensor()]) ):
-        self.input_list = sorted([os.path.join(args.dataset_dir, 'train/input', name) for name in 
+        self.input_list = sorted([os.path.join(args.dataset_dir, 'train/input', name) for name in
             os.listdir( os.path.join(args.dataset_dir, 'train/input') )])
-        self.ref_list = sorted([os.path.join(args.dataset_dir, 'train/ref', name) for name in 
+        self.ref_list = sorted([os.path.join(args.dataset_dir, 'train/ref', name) for name in
             os.listdir( os.path.join(args.dataset_dir, 'train/ref') )])
         self.transform = transform
 
@@ -89,7 +89,7 @@ class TrainSet(Dataset):
         h2, w2 = Ref_sub.shape[:2]
         Ref_sr_sub = np.array(Image.fromarray(Ref_sub).resize((w2//4, h2//4), Image.BICUBIC))
         Ref_sr_sub = np.array(Image.fromarray(Ref_sr_sub).resize((w2, h2), Image.BICUBIC))
-    
+
         ### complete ref and ref_sr to the same size, to use batch_size > 1
         Ref = np.zeros((160, 160, 3))
         Ref_sr = np.zeros((160, 160, 3))
@@ -110,10 +110,10 @@ class TrainSet(Dataset):
         Ref = Ref / 127.5 - 1.
         Ref_sr = Ref_sr / 127.5 - 1.
 
-        sample = {'LR': LR,  
+        sample = {'LR': LR,
                   'LR_sr': LR_sr,
                   'HR': HR,
-                  'Ref': Ref, 
+                  'Ref': Ref,
                   'Ref_sr': Ref_sr}
 
         if self.transform:
@@ -124,7 +124,7 @@ class TrainSet(Dataset):
 class TestSet(Dataset):
     def __init__(self, args, ref_level='1', transform=transforms.Compose([ToTensor()])):
         self.input_list = sorted(glob.glob(os.path.join(args.dataset_dir, 'test/CUFED5', '*_0.png')))
-        self.ref_list = sorted(glob.glob(os.path.join(args.dataset_dir, 'test/CUFED5', 
+        self.ref_list = sorted(glob.glob(os.path.join(args.dataset_dir, 'test/CUFED5',
             '*_' + ref_level + '.png')))
         self.transform = transform
 
@@ -164,10 +164,10 @@ class TestSet(Dataset):
         Ref = Ref / 127.5 - 1.
         Ref_sr = Ref_sr / 127.5 - 1.
 
-        sample = {'LR': LR,  
+        sample = {'LR': LR,
                   'LR_sr': LR_sr,
                   'HR': HR,
-                  'Ref': Ref, 
+                  'Ref': Ref,
                   'Ref_sr': Ref_sr}
 
         if self.transform:
