@@ -9,7 +9,7 @@ def conv1x1(in_channels, out_channels, stride=1):
 
 
 def conv3x3(in_channels, out_channels, stride=1):
-    return nn.Conv2d(in_channels, out_channels, kernel_size=3, 
+    return nn.Conv2d(in_channels, out_channels, kernel_size=3,
                      stride=stride, padding=1, bias=True)
 
 
@@ -20,7 +20,7 @@ class ResBlock(nn.Module):
         self.conv1 = conv3x3(in_channels, out_channels, stride)
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = conv3x3(out_channels, out_channels)
-        
+
     def forward(self, x):
         x1 = x
         out = self.conv1(x)
@@ -35,14 +35,14 @@ class SFE(nn.Module):
         super(SFE, self).__init__()
         self.num_res_blocks = num_res_blocks
         self.conv_head = conv3x3(3, n_feats)
-        
+
         self.RBs = nn.ModuleList()
         for i in range(self.num_res_blocks):
-            self.RBs.append(ResBlock(in_channels=n_feats, out_channels=n_feats, 
+            self.RBs.append(ResBlock(in_channels=n_feats, out_channels=n_feats,
                 res_scale=res_scale))
-            
+
         self.conv_tail = conv3x3(n_feats, n_feats)
-        
+
     def forward(self, x):
         x = F.relu(self.conv_head(x))
         x1 = x
@@ -107,7 +107,7 @@ class CSFI3(nn.Module):
         x1 = F.relu(self.conv_merge1( torch.cat((x1, x21, x31), dim=1) ))
         x2 = F.relu(self.conv_merge2( torch.cat((x2, x12, x32), dim=1) ))
         x3 = F.relu(self.conv_merge3( torch.cat((x3, x13, x23), dim=1) ))
-        
+
         return x1, x2, x3
 
 
@@ -130,7 +130,7 @@ class MergeTail(nn.Module):
         x = self.conv_tail1(x)
         x = self.conv_tail2(x)
         x = torch.clamp(x, -1, 1)
-        
+
         return x
 
 
@@ -260,7 +260,7 @@ class MainNet(nn.Module):
         x33_res = self.conv33_head(x33_res) #F.relu(self.conv33_head(x33_res))
         x33_res = x33_res * F.interpolate(S, scale_factor=4, mode='bicubic')
         x33 = x33 + x33_res
-        
+
         x33_res = x33
 
         x31_res, x32_res, x33_res = self.ex123(x31_res, x32_res, x33_res)

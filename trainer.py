@@ -6,7 +6,7 @@ import numpy as np
 from imageio import imread, imsave
 from PIL import Image
 
-import torch 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -26,12 +26,12 @@ class Trainer():
             self.vgg19 = nn.DataParallel(self.vgg19, list(range(self.args.num_gpu)))
 
         self.params = [
-            {"params": filter(lambda p: p.requires_grad, self.model.MainNet.parameters() if 
+            {"params": filter(lambda p: p.requires_grad, self.model.MainNet.parameters() if
              args.num_gpu==1 else self.model.module.MainNet.parameters()),
              "lr": args.lr_rate
             },
-            {"params": filter(lambda p: p.requires_grad, self.model.LTE.parameters() if 
-             args.num_gpu==1 else self.model.module.LTE.parameters()), 
+            {"params": filter(lambda p: p.requires_grad, self.model.LTE.parameters() if
+             args.num_gpu==1 else self.model.module.LTE.parameters()),
              "lr": args.lr_rate_lte
             }
         ]
@@ -80,7 +80,7 @@ class Trainer():
             rec_loss = self.args.rec_w * self.loss_all['rec_loss'](sr, hr)
             loss = rec_loss
             if (is_print):
-                self.logger.info( ('init ' if is_init else '') + 'epoch: ' + str(current_epoch) + 
+                self.logger.info( ('init ' if is_init else '') + 'epoch: ' + str(current_epoch) +
                     '\t batch: ' + str(i_batch+1) )
                 self.logger.info( 'rec_loss: %.10f' %(rec_loss.item()) )
 
@@ -95,7 +95,7 @@ class Trainer():
                         self.logger.info( 'per_loss: %.10f' %(per_loss.item()) )
                 if ('tpl_loss' in self.loss_all):
                     sr_lv1, sr_lv2, sr_lv3 = self.model(sr=sr)
-                    tpl_loss = self.args.tpl_w * self.loss_all['tpl_loss'](sr_lv3, sr_lv2, sr_lv1, 
+                    tpl_loss = self.args.tpl_w * self.loss_all['tpl_loss'](sr_lv3, sr_lv2, sr_lv1,
                         S, T_lv3, T_lv2, T_lv1)
                     loss += tpl_loss
                     if (is_print):
@@ -112,7 +112,7 @@ class Trainer():
         if ((not is_init) and current_epoch % self.args.save_every == 0):
             self.logger.info('saving the model...')
             tmp = self.model.state_dict()
-            model_state_dict = {key.replace('module.',''): tmp[key] for key in tmp if 
+            model_state_dict = {key.replace('module.',''): tmp[key] for key in tmp if
                 (('SearchNet' not in key) and ('_copy' not in key))}
             model_name = self.args.save_dir.strip('/')+'/model/model_'+str(current_epoch).zfill(5)+'.pt'
             torch.save(model_state_dict, model_name)
@@ -138,7 +138,7 @@ class Trainer():
                         sr_save = (sr+1.) * 127.5
                         sr_save = np.transpose(sr_save.squeeze().round().cpu().numpy(), (1, 2, 0)).astype(np.uint8)
                         imsave(os.path.join(self.args.save_dir, 'save_results', str(i_batch).zfill(5)+'.png'), sr_save)
-                    
+
                     ### calculate psnr and ssim
                     _psnr, _ssim = calc_psnr_and_ssim(sr.detach(), hr.detach())
 
@@ -154,7 +154,7 @@ class Trainer():
                 if (ssim_ave > self.max_ssim):
                     self.max_ssim = ssim_ave
                     self.max_ssim_epoch = current_epoch
-                self.logger.info('Ref  PSNR (max): %.3f (%d) \t SSIM (max): %.4f (%d)' 
+                self.logger.info('Ref  PSNR (max): %.3f (%d) \t SSIM (max): %.4f (%d)'
                     %(self.max_psnr, self.max_psnr_epoch, self.max_ssim, self.max_ssim_epoch))
 
         self.logger.info('Evaluation over.')
@@ -168,7 +168,7 @@ class Trainer():
         LR = imread(self.args.lr_path)
         h1, w1 = LR.shape[:2]
         LR_sr = np.array(Image.fromarray(LR).resize((w1*4, h1*4), Image.BICUBIC))
-        
+
         ### Ref and Ref_sr
         Ref = imread(self.args.ref_path)
         h2, w2 = Ref.shape[:2]

@@ -8,7 +8,7 @@ from utils import MeanShift
 class LTE(torch.nn.Module):
     def __init__(self, requires_grad=True, rgb_range=1):
         super(LTE, self).__init__()
-        
+
         ### use vgg19 weights to initialize
         vgg_pretrained_features = models.vgg19(pretrained=True).features
 
@@ -29,7 +29,7 @@ class LTE(torch.nn.Module):
                 param.requires_grad = requires_grad
             for param in self.slice3.parameters():
                 param.requires_grad = requires_grad
-        
+
         vgg_mean = (0.485, 0.456, 0.406)
         vgg_std = (0.229 * rgb_range, 0.224 * rgb_range, 0.225 * rgb_range)
         self.sub_mean = MeanShift(rgb_range, vgg_mean, vgg_std)

@@ -14,12 +14,12 @@ python main.py --save_dir ./train/CUFED/TTSR \
                --per_w 1e-2 \
                --tpl_w 1e-2 \
                --adv_w 1e-3 \
-               --batch_size 9 \
+               --batch_size 8 \
                --num_init_epochs 2 \
                --num_epochs 50 \
                --print_every 600 \
-               --save_every 10 \
-               --val_every 10
+               --save_every 5 \
+               --val_every 5
 
 
 # ### training TTSR-rec

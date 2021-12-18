@@ -49,7 +49,7 @@ def mkExpDir(args):
 
     if ((not args.eval) and (not args.test)):
         os.makedirs(os.path.join(args.save_dir, 'model'))
-    
+
     if ((args.eval and args.eval_save_results) or args.test):
         os.makedirs(os.path.join(args.save_dir, 'save_results'))
 
@@ -57,7 +57,7 @@ def mkExpDir(args):
     for k, v in vars(args).items():
         args_file.write(k.rjust(30,' ') + '\t' + str(v) + '\n')
 
-    _logger = Logger(log_file_name=os.path.join(args.save_dir, args.log_file_name), 
+    _logger = Logger(log_file_name=os.path.join(args.save_dir, args.log_file_name),
         logger_name=args.logger_name).get_log()
 
     return _logger
@@ -88,8 +88,8 @@ def calc_psnr(img1, img2):
     diff = np.sum(diff, axis=2)
     mse = np.mean(np.power(diff, 2))
     return -10 * math.log10(mse)
-    
-  
+
+
 def calc_ssim(img1, img2):
     def ssim(img1, img2):
         C1 = (0.01 * 255)**2
