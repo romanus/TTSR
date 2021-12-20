@@ -5,3 +5,4 @@ dataset/CUFED
 test/demo/output/
 train/
 eval/
+runs/

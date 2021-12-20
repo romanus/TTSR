@@ -11,6 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.utils as utils
+from torch.utils.tensorboard import SummaryWriter
 
 
 class Trainer():
@@ -43,6 +44,8 @@ class Trainer():
         self.max_ssim = 0.
         self.max_ssim_epoch = 0
 
+        self.writer = SummaryWriter()
+
     def load(self, model_path=None):
         if (model_path):
             self.logger.info('load_model_path: ' + model_path)
@@ -63,7 +66,9 @@ class Trainer():
             self.scheduler.step()
         self.logger.info('Current epoch learning rate: %e' %(self.optimizer.param_groups[0]['lr']))
 
-        for i_batch, sample_batched in enumerate(self.dataloader['train']):
+        dataloader = self.dataloader['train']
+        epoch_logs_num = (len(dataloader) // self.args.print_every) + 1
+        for i_batch, sample_batched in enumerate(dataloader):
             self.optimizer.zero_grad()
 
             sample_batched = self.prepare(sample_batched)
@@ -83,6 +88,8 @@ class Trainer():
                 self.logger.info( ('init ' if is_init else '') + 'epoch: ' + str(current_epoch) +
                     '\t batch: ' + str(i_batch+1) )
                 self.logger.info( 'rec_loss: %.10f' %(rec_loss.item()) )
+                self.writer.add_scalar("train/rec_loss", rec_loss.item(), ((current_epoch - 1) * epoch_logs_num) + (i_batch + 1) // self.args.print_every)
+                self.writer.flush()
 
             if (not is_init):
                 if ('per_loss' in self.loss_all):
@@ -108,6 +115,9 @@ class Trainer():
 
             loss.backward()
             self.optimizer.step()
+
+        self.writer.add_scalar("train/rec_loss", rec_loss.item(), current_epoch * epoch_logs_num)
+        self.writer.flush()
 
         if ((not is_init) and current_epoch % self.args.save_every == 0):
             self.logger.info('saving the model...')
@@ -148,6 +158,9 @@ class Trainer():
                 psnr_ave = psnr / cnt
                 ssim_ave = ssim / cnt
                 self.logger.info('Ref  PSNR (now): %.3f \t SSIM (now): %.4f' %(psnr_ave, ssim_ave))
+                self.writer.add_scalar("test/psnr", psnr_ave, current_epoch)
+                self.writer.add_scalar("test/ssim", ssim_ave, current_epoch)
+                self.writer.flush()
                 if (psnr_ave > self.max_psnr):
                     self.max_psnr = psnr_ave
                     self.max_psnr_epoch = current_epoch
