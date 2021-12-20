@@ -40,7 +40,10 @@ class Logger(object):
 def mkExpDir(args):
     if (os.path.exists(args.save_dir)):
         if (not args.reset):
-            raise SystemExit('Error: save_dir "' + args.save_dir + '" already exists! Please set --reset True to delete the folder.')
+            _logger = Logger(log_file_name=os.path.join(args.save_dir, args.log_file_name),
+            logger_name=args.logger_name).get_log()
+            return _logger
+            #raise SystemExit('Error: save_dir "' + args.save_dir + '" already exists! Please set --reset True to delete the folder.')
         else:
             shutil.rmtree(args.save_dir)
 

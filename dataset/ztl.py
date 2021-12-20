@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 
 def get_item(input_image_path, ref_image_path):
     ### HR
-    HR = imread(input_image_path)
+    HR = imread(input_image_path)[:256, :256]
     h,w = HR.shape[:2]
     #HR = HR[:h//4*4, :w//4*4, :]
 
@@ -23,7 +23,7 @@ def get_item(input_image_path, ref_image_path):
     LR_sr = np.array(Image.fromarray(LR).resize((w, h), Image.BICUBIC))
 
     ### Ref and Ref_sr
-    Ref_sub = imread(ref_image_path)
+    Ref_sub = imread(ref_image_path)[:256, :256]
     h2, w2 = Ref_sub.shape[:2]
     Ref_sr_sub = np.array(Image.fromarray(Ref_sub).resize((w2//4, h2//4), Image.BICUBIC))
     Ref_sr_sub = np.array(Image.fromarray(Ref_sr_sub).resize((w2, h2), Image.BICUBIC))
