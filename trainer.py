@@ -45,6 +45,18 @@ class Trainer():
         self.max_ssim_epoch = 0
 
         self.writer = SummaryWriter()
+        # self.writer.add_hparams(
+        #     hparam_dict=
+        #     {
+        #         "lr_rate": args.lr_rate,
+        #         "lr_rate_dis": args.lr_rate_dis,
+        #         "lr_rate_lte": args.lr_rate_lte,
+        #         "rec_w": args.rec_w,
+        #         "per_w": args.per_w,
+        #         "tpl_w": args.tpl_w,
+        #         "adv_w": args.adv_w
+        #     },
+        #     metric_dict={})
 
     def load(self, model_path=None):
         if (model_path):
