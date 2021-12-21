@@ -44,7 +44,7 @@ class Trainer():
         self.max_ssim = 0.
         self.max_ssim_epoch = 0
 
-        self.writer = SummaryWriter()
+        self.writer = SummaryWriter(comment=args.dataset)
         # self.writer.add_hparams(
         #     hparam_dict=
         #     {
@@ -93,15 +93,19 @@ class Trainer():
 
             ### calc loss
             is_print = ((i_batch + 1) % self.args.print_every == 0) ### flag of print
+            iteration_idx = (current_epoch - 1) * epoch_logs_num + (i_batch + 1) // self.args.print_every
 
             rec_loss = self.args.rec_w * self.loss_all['rec_loss'](sr, hr)
             loss = rec_loss
             if (is_print):
+                iteration_idx_rec = iteration_idx
+                if is_init:
+                    iteration_idx_rec -= self.args.num_init_epochs * epoch_logs_num
+
                 self.logger.info( ('init ' if is_init else '') + 'epoch: ' + str(current_epoch) +
                     '\t batch: ' + str(i_batch+1) )
                 self.logger.info( 'rec_loss: %.10f' %(rec_loss.item()) )
-                self.writer.add_scalar("train/rec_loss", rec_loss.item(), ((current_epoch - 1) * epoch_logs_num) + (i_batch + 1) // self.args.print_every)
-                self.writer.flush()
+                self.writer.add_scalar("train/rec_loss", rec_loss.item(), iteration_idx_rec)
 
             if (not is_init):
                 if ('per_loss' in self.loss_all):
@@ -112,6 +116,7 @@ class Trainer():
                     loss += per_loss
                     if (is_print):
                         self.logger.info( 'per_loss: %.10f' %(per_loss.item()) )
+                        self.writer.add_scalar("train/per_loss", per_loss.item(), iteration_idx)
                 if ('tpl_loss' in self.loss_all):
                     sr_lv1, sr_lv2, sr_lv3 = self.model(sr=sr)
                     tpl_loss = self.args.tpl_w * self.loss_all['tpl_loss'](sr_lv3, sr_lv2, sr_lv1,
@@ -119,16 +124,32 @@ class Trainer():
                     loss += tpl_loss
                     if (is_print):
                         self.logger.info( 'tpl_loss: %.10f' %(tpl_loss.item()) )
+                        self.writer.add_scalar("train/tpl_loss", tpl_loss.item(), iteration_idx)
                 if ('adv_loss' in self.loss_all):
                     adv_loss = self.args.adv_w * self.loss_all['adv_loss'](sr, hr)
                     loss += adv_loss
                     if (is_print):
                         self.logger.info( 'adv_loss: %.10f' %(adv_loss.item()) )
+                        self.writer.add_scalar("train/adv_loss", adv_loss.item(), iteration_idx)
 
             loss.backward()
             self.optimizer.step()
 
-        self.writer.add_scalar("train/rec_loss", rec_loss.item(), current_epoch * epoch_logs_num)
+            self.writer.flush()
+
+        # log end epoch losses
+        last_iteration_idx = current_epoch * epoch_logs_num
+        last_iteration_idx_rec = last_iteration_idx
+        if is_init:
+            last_iteration_idx_rec -= self.args.num_init_epochs * epoch_logs_num
+        self.writer.add_scalar("train/rec_loss", rec_loss.item(), last_iteration_idx_rec)
+        if not is_init:
+            if ('per_loss' in self.loss_all):
+                self.writer.add_scalar("train/per_loss", per_loss.item(), last_iteration_idx)
+            if ('tpl_loss' in self.loss_all):
+                self.writer.add_scalar("train/tpl_loss", tpl_loss.item(), last_iteration_idx)
+            if ('adv_loss' in self.loss_all):
+                self.writer.add_scalar("train/adv_loss", adv_loss.item(), last_iteration_idx)
         self.writer.flush()
 
         if ((not is_init) and current_epoch % self.args.save_every == 0):
