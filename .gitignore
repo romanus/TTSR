@@ -1,6 +1,7 @@
 __pycache__
 dataset/ztl
 dataset/CUFED
+dataset/ffhq*/
 *.pt
 test/demo/output/
 train/

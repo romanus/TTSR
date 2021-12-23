@@ -80,6 +80,9 @@ class Trainer():
 
         dataloader = self.dataloader['train']
         epoch_logs_num = (len(dataloader) // self.args.print_every) + 1
+        if current_epoch == 1:
+            self.logger.info('logs per epoch: {}'.format(epoch_logs_num))
+
         for i_batch, sample_batched in enumerate(dataloader):
             self.optimizer.zero_grad()
 
@@ -163,7 +166,7 @@ class Trainer():
     def evaluate(self, current_epoch=0):
         self.logger.info('Epoch ' + str(current_epoch) + ' evaluation process...')
 
-        if (self.args.dataset == 'CUFED' or self.args.dataset == 'ztl'):
+        if (self.args.dataset == 'CUFED' or self.args.dataset == 'ffhq'):
             self.model.eval()
             with torch.no_grad():
                 psnr, ssim, cnt = 0., 0., 0

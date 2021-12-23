@@ -12,18 +12,19 @@ from torchvision import transforms
 import warnings
 warnings.filterwarnings("ignore")
 
+folder_name = os.path.join(".", "ffhq512")
+
 def get_item(input_image_path, ref_image_path):
     ### HR
-    HR = imread(input_image_path)[:256, :256]
+    HR = imread(input_image_path)
     h,w = HR.shape[:2]
-    #HR = HR[:h//4*4, :w//4*4, :]
 
     ### LR and LR_sr
     LR = np.array(Image.fromarray(HR).resize((w//4, h//4), Image.BICUBIC))
     LR_sr = np.array(Image.fromarray(LR).resize((w, h), Image.BICUBIC))
 
     ### Ref and Ref_sr
-    Ref_sub = imread(ref_image_path)[:256, :256]
+    Ref_sub = imread(ref_image_path)
     h2, w2 = Ref_sub.shape[:2]
     Ref_sr_sub = np.array(Image.fromarray(Ref_sub).resize((w2//4, h2//4), Image.BICUBIC))
     Ref_sr_sub = np.array(Image.fromarray(Ref_sr_sub).resize((w2, h2), Image.BICUBIC))
@@ -70,22 +71,27 @@ class ToTensor(object):
                 'Ref': torch.from_numpy(Ref).float(),
                 'Ref_sr': torch.from_numpy(Ref_sr).float()}
 
+def train_test_split(path, train_ratio=0.8):
+    images_list = []
+
+    for root, _, files in os.walk(path):
+        for file in files:
+            input_file_path = os.path.join(root, file)
+            images_list.append(input_file_path)
+
+    all_images_len = len(images_list)
+    train_images_len = int(train_ratio * all_images_len)
+    test_images_len = all_images_len - train_images_len
+
+    return torch.utils.data.random_split(images_list, [train_images_len, test_images_len], generator=torch.Generator().manual_seed(42))
 
 class TrainSet(Dataset):
     def __init__(self, args, transform=transforms.Compose([ToTensor()])):
-        data_path = os.path.join(args.dataset_dir, 'test')
-        data_folders = os.listdir(data_path)
 
-        self.input_list = []
-        self.ref_list = []
+        train_set, _ = train_test_split(args.dataset_dir)
 
-        for folder in data_folders:
-            for idx in [7, 5, 4, 3]:
-                input_image_path = os.path.join(data_path, folder, "0000{}.JPG".format(idx))
-                ref_image_path = os.path.join(data_path, folder, "0000{}.JPG".format(idx-2))
-                if(os.path.exists(input_image_path)):
-                    self.input_list.append(input_image_path)
-                    self.ref_list.append(ref_image_path)
+        self.input_list = train_set
+        self.ref_list = train_set
 
         self.transform = transform
 
@@ -101,19 +107,10 @@ class TrainSet(Dataset):
 
 class TestSet(Dataset):
     def __init__(self, args, transform=transforms.Compose([ToTensor()])):
-        data_path = os.path.join(args.dataset_dir, 'test')
-        data_folders = os.listdir(data_path)
+        _, test_set = train_test_split(args.dataset_dir)
 
-        self.input_list = []
-        self.ref_list = []
-
-        for folder in data_folders:
-            for idx in [6]:
-                input_image_path = os.path.join(data_path, folder, "0000{}.JPG".format(idx))
-                ref_image_path = os.path.join(data_path, folder, "0000{}.JPG".format(idx-2))
-                if(os.path.exists(input_image_path)):
-                    self.input_list.append(input_image_path)
-                    self.ref_list.append(ref_image_path)
+        self.input_list = test_set
+        self.ref_list = test_set
 
         self.transform = transform
 
