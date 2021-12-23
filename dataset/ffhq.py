@@ -77,6 +77,8 @@ def train_test_split(path, train_ratio=0.8):
             input_file_path = os.path.join(root, file)
             images_list.append(input_file_path)
 
+    # images_list = images_list[0:(len(images_list)//32)]
+
     all_images_len = len(images_list)
     train_images_len = int(train_ratio * all_images_len)
     test_images_len = all_images_len - train_images_len
