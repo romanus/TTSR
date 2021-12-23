@@ -66,8 +66,7 @@ class TPerceptualLoss(nn.Module):
 
 
 class AdversarialLoss(nn.Module):
-    def __init__(self, logger, use_cpu=False, num_gpu=1, gan_type='WGAN_GP', gan_k=1, 
-        lr_dis=1e-4, train_crop_size=40):
+    def __init__(self, logger, use_cpu, num_gpu, gan_type, gan_k, lr_dis, train_crop_size):
 
         super(AdversarialLoss, self).__init__()
         self.logger = logger
@@ -92,7 +91,7 @@ class AdversarialLoss(nn.Module):
         #     D_state_dict = torch.load(D_path)
         #     self.discriminator.load_state_dict(D_state_dict['D'])
         #     self.optimizer.load_state_dict(D_state_dict['D_optim'])
-            
+
     def forward(self, fake, real):
         fake_detach = fake.detach()
 

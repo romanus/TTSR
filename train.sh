@@ -28,9 +28,10 @@ python main.py --save_dir ./train/CUFED/TTSR-rec \
                --log_file_name train.log \
                --num_gpu 1 \
                --num_workers 9 \
-               --dataset ffhq \
-               --dataset_dir ./dataset/ffhq512/ \
+               --dataset CUFED \
+               --dataset_dir ./dataset/CUFED/ \
                --n_feats 64 \
+               --train_crop_size 40 \
                --lr_rate 1e-4 \
                --lr_rate_dis 1e-4 \
                --lr_rate_lte 1e-5 \
