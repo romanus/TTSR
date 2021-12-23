@@ -66,7 +66,7 @@ python main.py --save_dir ./train/CUFED/TTSR-rec \
                --batch_size 8 \
                --num_init_epochs 0 \
                --num_epochs 30 \
-               --print_every 105 \
+               --print_every 62 \
                --save_every 5 \
                --val_every 1
 

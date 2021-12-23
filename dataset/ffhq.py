@@ -69,7 +69,7 @@ class ToTensor(object):
                 'Ref': torch.from_numpy(Ref).float(),
                 'Ref_sr': torch.from_numpy(Ref_sr).float()}
 
-def train_test_split(path, train_ratio=0.8):
+def train_test_split(path, train_ratio=0.8, dataset_part=0.6):
     images_list = []
 
     for root, _, files in os.walk(path):
@@ -77,7 +77,8 @@ def train_test_split(path, train_ratio=0.8):
             input_file_path = os.path.join(root, file)
             images_list.append(input_file_path)
 
-    # images_list = images_list[0:(len(images_list)//32)]
+    if dataset_part != 1.0:
+        images_list = images_list[0:int(len(images_list)*dataset_part)]
 
     all_images_len = len(images_list)
     train_images_len = int(train_ratio * all_images_len)
