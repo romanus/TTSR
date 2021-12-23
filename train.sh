@@ -3,7 +3,7 @@
 #                --reset False \
 #                --log_file_name train.log \
 #                --num_gpu 1 \
-#                --num_workers 9 \
+#                --num_workers 1 \
 #                --dataset CUFED \
 #                --dataset_dir ./dataset/CUFED/ \
 #                --n_feats 64 \
@@ -27,7 +27,7 @@
 #                --reset False \
 #                --log_file_name train.log \
 #                --num_gpu 1 \
-#                --num_workers 9 \
+#                --num_workers 1 \
 #                --dataset CUFED \
 #                --dataset_dir ./dataset/CUFED/ \
 #                --n_feats 64 \
@@ -51,7 +51,7 @@ python main.py --save_dir ./train/CUFED/TTSR-rec \
                --reset False \
                --log_file_name train.log \
                --num_gpu 1 \
-               --num_workers 9 \
+               --num_workers 1 \
                --dataset ffhq \
                --dataset_dir ./dataset/ffhq160/ \
                --n_feats 64 \

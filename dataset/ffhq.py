@@ -12,8 +12,6 @@ from torchvision import transforms
 import warnings
 warnings.filterwarnings("ignore")
 
-folder_name = os.path.join(".", "ffhq512")
-
 def get_item(input_image_path, ref_image_path):
     ### HR
     HR = imread(input_image_path)
