@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 
 input_resolution = 1024
-output_resolution = 512
+output_resolution = 160
 
 if __name__ == '__main__':
     input_folder = os.path.join(".", "ffhq{}".format(input_resolution))

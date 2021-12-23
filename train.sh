@@ -53,9 +53,9 @@ python main.py --save_dir ./train/CUFED/TTSR-rec \
                --num_gpu 1 \
                --num_workers 9 \
                --dataset ffhq \
-               --dataset_dir ./dataset/ffhq256/ \
+               --dataset_dir ./dataset/ffhq160/ \
                --n_feats 64 \
-               --train_crop_size 64 \
+               --train_crop_size 40 \
                --lr_rate 1e-4 \
                --lr_rate_dis 1e-4 \
                --lr_rate_lte 1e-5 \
@@ -63,7 +63,7 @@ python main.py --save_dir ./train/CUFED/TTSR-rec \
                --per_w 0 \
                --tpl_w 0 \
                --adv_w 0 \
-               --batch_size 4 \
+               --batch_size 8 \
                --num_init_epochs 0 \
                --num_epochs 30 \
                --print_every 50 \

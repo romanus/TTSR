@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-if __name__ == '__main__':
+def main():
     ### make save_dir
     _logger = mkExpDir(args)
 
@@ -50,3 +50,6 @@ if __name__ == '__main__':
             t.train(current_epoch=epoch, is_init=False)
             if (epoch % args.val_every == 0):
                 t.evaluate(current_epoch=epoch)
+
+if __name__ == '__main__':
+    main()
