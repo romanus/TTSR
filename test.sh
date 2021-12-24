@@ -4,6 +4,6 @@ python main.py --save_dir ./test/demo/output/ \
                --log_file_name test.log \
                --test True \
                --num_workers 1 \
-               --lr_path ./test/demo/lr/0.png \
-               --ref_path ./test/demo/ref/0.png \
-               --model_path ./train/CUFED/TTSR-rec3/model/model_00030.pt
+               --lr_path ./results/Experiment1/images/input-lq.png \
+               --ref_path ./results/Experiment1/images/ref-hq.png \
+               --model_path ./train/CUFED/TTSR1-3/model/model_00030.pt

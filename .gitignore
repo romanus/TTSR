@@ -6,4 +6,4 @@ dataset/ffhq*/
 test/demo/output/
 train/
 eval/
-runs*/
+/runs*/
