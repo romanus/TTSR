@@ -33,9 +33,9 @@ Understand how long does the training process takes for different image sizes on
 
 | image size | batch size | estimated epoch train time |
 |------------|------------|----------------------------|
-| 512x512    | 1          | 10 hours                   |
-| 384x384    | 1          | 5 hours                    |
-| 256x256    | 4          | 1.5 hours                  |
+| 512x512    | 1          | 4 hours                   |
+| 384x384    | 1          | 2 hours                    |
+| 256x256    | 4          | 1 hours                  |
 | 160x160    | 8          | 0.5 hours                  |
 
 ### Analysis
