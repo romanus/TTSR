@@ -1,12 +1,11 @@
 import os
-from imageio import imread
-from PIL import Image
+from imageio import imread, imwrite
+from PIL import Image, ImageFilter
 import numpy as np
 
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-
 
 # Ignore warnings
 import warnings
@@ -17,12 +16,17 @@ def get_item(input_image_path, ref_image_path):
     HR = imread(input_image_path)
     h,w = HR.shape[:2]
 
+    HR_blurred = np.array(Image.fromarray(HR).filter(ImageFilter.GaussianBlur(5)))
+    HR_blurred_part = np.copy(HR)
+    start, end = int(h*0.5), int(h*0.8)
+    HR_blurred_part[start:end, start:end] = HR_blurred[start:end, start:end]
+
     ### LR and LR_sr
-    LR = np.array(Image.fromarray(HR).resize((w//4, h//4), Image.BICUBIC))
+    LR = np.array(Image.fromarray(HR_blurred_part).resize((w//4, h//4), Image.BICUBIC))
     LR_sr = np.array(Image.fromarray(LR).resize((w, h), Image.BICUBIC))
 
     ### Ref and Ref_sr
-    Ref_sub = imread(ref_image_path)
+    Ref_sub = HR_blurred_part
     h2, w2 = Ref_sub.shape[:2]
     Ref_sr_sub = np.array(Image.fromarray(Ref_sub).resize((w2//4, h2//4), Image.BICUBIC))
     Ref_sr_sub = np.array(Image.fromarray(Ref_sr_sub).resize((w2, h2), Image.BICUBIC))
@@ -32,6 +36,11 @@ def get_item(input_image_path, ref_image_path):
     Ref_sr = np.zeros((h, w, 3))
     Ref[:h2, :w2, :] = Ref_sub
     Ref_sr[:h2, :w2, :] = Ref_sr_sub
+
+    # imwrite('./sample-LR.png', LR)
+    # imwrite('./sample-HR.png', HR)
+    # imwrite('./sample-Ref.png', Ref)
+    # exit()
 
     ### change type
     LR = LR.astype(np.float32)
@@ -69,7 +78,7 @@ class ToTensor(object):
                 'Ref': torch.from_numpy(Ref).float(),
                 'Ref_sr': torch.from_numpy(Ref_sr).float()}
 
-def train_test_split(path, train_ratio=0.8, dataset_part=0.6):
+def train_test_split(path, train_ratio=0.9, dataset_part=1.0):
     images_list = []
 
     for root, _, files in os.walk(path):
@@ -101,6 +110,7 @@ class TrainSet(Dataset):
 
     def __getitem__(self, idx):
         sample = get_item(self.input_list[idx], self.ref_list[idx])
+
         if self.transform:
             sample = self.transform(sample)
         return sample
@@ -120,6 +130,7 @@ class TestSet(Dataset):
 
     def __getitem__(self, idx):
         sample = get_item(self.input_list[idx], self.ref_list[idx])
+
         if self.transform:
             sample = self.transform(sample)
         return sample

@@ -60,14 +60,14 @@ python main.py --save_dir ./train/CUFED/TTSR-rec \
                --lr_rate_dis 1e-4 \
                --lr_rate_lte 1e-5 \
                --rec_w 1 \
-               --per_w 0 \
-               --tpl_w 0 \
-               --adv_w 0 \
+               --per_w 1e-2 \
+               --tpl_w 1e-2 \
+               --adv_w 1e-3 \
                --batch_size 8 \
-               --num_init_epochs 0 \
+               --num_init_epochs 1 \
                --num_epochs 30 \
-               --print_every 62 \
-               --save_every 5 \
+               --print_every 115 \
+               --save_every 1 \
                --val_every 1
 
 # profile
