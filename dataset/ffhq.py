@@ -16,12 +16,14 @@ def get_item(idx, input_image_path, ref_image_path):
     HR = imread(input_image_path)
     h,w = HR.shape[:2]
 
-    HR_blurred = np.array(Image.fromarray(HR).filter(ImageFilter.GaussianBlur(5)))
+    np.random.seed(idx)
+
+    sigma = np.random.randint(low = 5, high = 10, size = 1)
+    HR_blurred = np.array(Image.fromarray(HR).filter(ImageFilter.GaussianBlur(sigma)))
     HR_blurred_part = np.copy(HR)
 
     start_h, end_h = h*0.35, h*0.65
     start_w, end_w = w*0.35, w*0.65
-    np.random.seed(idx)
     offsets = np.random.randint(low = -30, high = 30, size = 2) / 100
     start_h = int(start_h + offsets[0] * h)
     end_h = int(end_h + offsets[0] * h)
@@ -87,7 +89,7 @@ class ToTensor(object):
                 'Ref': torch.from_numpy(Ref).float(),
                 'Ref_sr': torch.from_numpy(Ref_sr).float()}
 
-def train_test_split(path, train_ratio=0.8, dataset_part=0.5):
+def train_test_split(path, train_ratio=0.9, dataset_part=0.5):
     images_list = []
 
     for root, _, files in os.walk(path):
