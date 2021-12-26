@@ -72,6 +72,39 @@ class Trainer():
             sample_batched[key] = sample_batched[key].to(self.device)
         return sample_batched
 
+    def visualize_reference_images(self, epoch_to_log, train_batches_visualize=1, test_batches_visualize=4):
+        train_dataloader = self.dataloader['train_no_shuffle']
+        for i_batch, train_batch in enumerate(train_dataloader):
+            # self.writer.add_images('test/image{}'.format(i_batch), np.uint8((train_batch["LR"] + 1) * 127.5), epoch_to_log)
+            self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_batch["Ref"] + 1) * 127.5), epoch_to_log)
+            if i_batch + 1 == train_batches_visualize:
+                break
+
+        test_dataloader = self.dataloader['test']['1']
+        for i_batch, test_batch in enumerate(test_dataloader):
+            # self.writer.add_images('test/image{}'.format(i_batch), np.uint8((test_batch["LR"] + 1) * 127.5), epoch_to_log)
+            self.writer.add_images('test/image{}'.format(i_batch), np.uint8((test_batch["Ref"] + 1) * 127.5), epoch_to_log)
+            if i_batch + 1 == test_batches_visualize:
+                break
+
+    def visualize_inference_results(self, current_epoch, train_batches_visualize=1, test_batches_visualize=4):
+
+        train_dataloader = self.dataloader['train_no_shuffle']
+        for i_batch, train_batch in enumerate(train_dataloader):
+            train_prepared = self.prepare(train_batch)
+            train_sr, _, _, _, _ = self.model(lr=train_prepared['LR'], lrsr=train_prepared['LR_sr'], ref=train_prepared['Ref'], refsr=train_prepared['Ref_sr'])
+            self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_sr.detach().cpu() + 1) * 127.5), current_epoch)
+            if i_batch + 1 == train_batches_visualize:
+                break
+
+        test_dataloader = self.dataloader['test']['1']
+        for i_batch, test_batch in enumerate(test_dataloader):
+            test_prepared = self.prepare(test_batch)
+            test_sr, _, _, _, _ = self.model(lr=test_prepared['LR'], lrsr=test_prepared['LR_sr'], ref=test_prepared['Ref'], refsr=test_prepared['Ref_sr'])
+            self.writer.add_images('test/image{}'.format(i_batch), np.uint8((test_sr.detach().cpu() + 1) * 127.5), current_epoch)
+            if i_batch + 1 == test_batches_visualize:
+                break
+
     def train(self, current_epoch=0, is_init=False):
         self.model.train()
         if (not is_init):
@@ -80,8 +113,11 @@ class Trainer():
 
         dataloader = self.dataloader['train']
         epoch_logs_num = (len(dataloader) // self.args.print_every) + 1
-        if current_epoch == 1:
+
+        # log only once in the beginning
+        if current_epoch == 1 and (is_init or self.args.num_init_epochs == 0):
             self.logger.info('logs per epoch: {}'.format(epoch_logs_num))
+            self.visualize_reference_images(-self.args.num_init_epochs)
 
         for i_batch, sample_batched in enumerate(dataloader):
             self.optimizer.zero_grad()
@@ -153,6 +189,10 @@ class Trainer():
                 self.writer.add_scalar("train/tpl_loss", tpl_loss.item(), last_iteration_idx)
             if ('adv_loss' in self.loss_all):
                 self.writer.add_scalar("train/adv_loss", adv_loss.item(), last_iteration_idx)
+        if not is_init:
+            self.visualize_inference_results(current_epoch)
+        else:
+            self.visualize_inference_results(current_epoch - self.args.num_init_epochs)
         self.writer.flush()
 
         if ((not is_init) and current_epoch % self.args.save_every == 0):
