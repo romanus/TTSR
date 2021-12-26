@@ -11,15 +11,24 @@ from torchvision import transforms
 import warnings
 warnings.filterwarnings("ignore")
 
-def get_item(input_image_path, ref_image_path):
+def get_item(idx, input_image_path, ref_image_path):
     ### HR
     HR = imread(input_image_path)
     h,w = HR.shape[:2]
 
     HR_blurred = np.array(Image.fromarray(HR).filter(ImageFilter.GaussianBlur(5)))
     HR_blurred_part = np.copy(HR)
-    start, end = int(h*0.5), int(h*0.8)
-    HR_blurred_part[start:end, start:end] = HR_blurred[start:end, start:end]
+
+    start_h, end_h = h*0.35, h*0.65
+    start_w, end_w = w*0.35, w*0.65
+    np.random.seed(idx)
+    offsets = np.random.randint(low = -30, high = 30, size = 2) / 100
+    start_h = int(start_h + offsets[0] * h)
+    end_h = int(end_h + offsets[0] * h)
+    start_w = int(start_w + offsets[1] * w)
+    end_w = int(end_w + offsets[1] * w)
+
+    HR_blurred_part[start_h:end_h, start_w:end_w] = HR_blurred[start_h:end_h, start_w:end_w]
 
     ### LR and LR_sr
     LR = np.array(Image.fromarray(HR_blurred_part).resize((w//4, h//4), Image.BICUBIC))
@@ -109,7 +118,7 @@ class TrainSet(Dataset):
         return len(self.input_list)
 
     def __getitem__(self, idx):
-        sample = get_item(self.input_list[idx], self.ref_list[idx])
+        sample = get_item(idx, self.input_list[idx], self.ref_list[idx])
 
         if self.transform:
             sample = self.transform(sample)
@@ -129,7 +138,7 @@ class TestSet(Dataset):
         return len(self.input_list)
 
     def __getitem__(self, idx):
-        sample = get_item(self.input_list[idx], self.ref_list[idx])
+        sample = get_item(idx, self.input_list[idx], self.ref_list[idx])
 
         if self.transform:
             sample = self.transform(sample)
