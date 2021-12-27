@@ -48,11 +48,6 @@ def get_item(idx, input_image_path, ref_image_path):
     Ref[:h2, :w2, :] = Ref_sub
     Ref_sr[:h2, :w2, :] = Ref_sr_sub
 
-    # imwrite('./sample-LR.png', LR)
-    # imwrite('./sample-HR.png', HR)
-    # imwrite('./sample-Ref.png', Ref)
-    # exit()
-
     ### change type
     LR = LR.astype(np.float32)
     LR_sr = LR_sr.astype(np.float32)
@@ -89,7 +84,7 @@ class ToTensor(object):
                 'Ref': torch.from_numpy(Ref).float(),
                 'Ref_sr': torch.from_numpy(Ref_sr).float()}
 
-def train_test_split(path, train_ratio=0.9, dataset_part=0.5):
+def train_test_split(path, train_ratio=0.9, dataset_part=0.3):
     images_list = []
 
     for root, _, files in os.walk(path):

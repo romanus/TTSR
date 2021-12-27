@@ -46,7 +46,7 @@
 #                --save_every 5 \
 #                --val_every 1
 
-### training TTSR-rec on ffhq
+### training TTSR on ffhq
 python main.py --save_dir ./train/CUFED/TTSR \
                --reset False \
                --log_file_name train.log \
@@ -65,8 +65,8 @@ python main.py --save_dir ./train/CUFED/TTSR \
                --adv_w 1e-3 \
                --batch_size 1 \
                --num_init_epochs 1 \
-               --num_epochs 30 \
-               --print_every 450 \
+               --num_epochs 50 \
+               --print_every 270 \
                --save_every 1 \
                --val_every 1
 
