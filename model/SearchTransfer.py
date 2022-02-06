@@ -20,7 +20,7 @@ class SearchTransfer(nn.Module):
         index = index.view(views).expand(expanse)
         return torch.gather(input, dim, index)
 
-    def forward(self, lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3):
+    def forward(self, lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3, return_attention):
         ### search
         lrsr_lv3_unfold  = F.unfold(lrsr_lv3, kernel_size=(3, 3), padding=1)
         refsr_lv3_unfold = F.unfold(refsr_lv3, kernel_size=(3, 3), padding=1)
@@ -47,4 +47,8 @@ class SearchTransfer(nn.Module):
 
         S = R_lv3_star.view(R_lv3_star.size(0), 1, lrsr_lv3.size(2), lrsr_lv3.size(3))
 
-        return S, T_lv3, T_lv2, T_lv1
+        if not return_attention:
+            return S, T_lv3, T_lv2, T_lv1
+
+        S_args = R_lv3_star_arg.view(R_lv3_star_arg.size(0), 1, lrsr_lv3.size(2), lrsr_lv3.size(3))
+        return S, S_args, T_lv3, T_lv2, T_lv1

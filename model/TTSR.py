@@ -16,7 +16,7 @@ class TTSR(nn.Module):
         self.LTE_copy = LTE.LTE(requires_grad=False) ### used in transferal perceptual loss
         self.SearchTransfer = SearchTransfer.SearchTransfer()
 
-    def forward(self, lr=None, lrsr=None, ref=None, refsr=None, sr=None):
+    def forward(self, lr=None, lrsr=None, ref=None, refsr=None, sr=None, return_attention=False):
         if (type(sr) != type(None)):
             ### used in transferal perceptual loss
             self.LTE_copy.load_state_dict(self.LTE.state_dict())
@@ -28,8 +28,14 @@ class TTSR(nn.Module):
 
         ref_lv1, ref_lv2, ref_lv3 = self.LTE((ref.detach() + 1.) / 2.)
 
-        S, T_lv3, T_lv2, T_lv1 = self.SearchTransfer(lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3)
+        if not return_attention:
+            S, T_lv3, T_lv2, T_lv1 = self.SearchTransfer(lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3, return_attention)
+        else:
+            S, S_args, T_lv3, T_lv2, T_lv1 = self.SearchTransfer(lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3, return_attention)
 
         sr = self.MainNet(lr, S, T_lv3, T_lv2, T_lv1)
 
-        return sr, S, T_lv3, T_lv2, T_lv1
+        if not return_attention:
+            return sr, S, T_lv3, T_lv2, T_lv1
+        else:
+            return sr, S, S_args, T_lv3, T_lv2, T_lv1

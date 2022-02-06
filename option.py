@@ -110,4 +110,10 @@ parser.add_argument('--lr_path', type=str, default='./test/demo/lr/lr.png',
 parser.add_argument('--ref_path', type=str, default='./test/demo/ref/ref.png',
                     help='The path of ref image when testing')
 
+### attention
+parser.add_argument('--attention_visualize', type=str2bool, default=False,
+                    help='')
+parser.add_argument('--attention_roi', type=str, default="[0:0,0:0]",
+                    help='[rowStart:rowEnd,colStart:colEnd]')
+
 args = parser.parse_args()

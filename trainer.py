@@ -4,7 +4,8 @@ from model import Vgg19
 import os
 import numpy as np
 from imageio import imread, imsave
-from PIL import Image
+from PIL import Image, ImageDraw
+import cv2
 
 import torch
 import torch.nn as nn
@@ -13,6 +14,50 @@ import torch.optim as optim
 import torchvision.utils as utils
 from torch.utils.tensorboard import SummaryWriter
 
+# [0:10,0:10]
+def deserialize_roi(roi_string):
+
+    data = roi_string[1:-1]
+    data = data.split(',')
+    row = data[0].split(':')
+    col = data[1].split(':')
+
+    return int(row[0]),int(row[1]),int(col[0]),int(col[1])
+
+def identify_attention(attention_args, roi_string, sr_image, ref_image):
+
+    rowStart, rowEnd, colStart, colEnd = deserialize_roi(roi_string)
+
+    # write a bounding box in the sr image
+    sr_image = Image.fromarray(sr_image)
+    sr_image_draw = ImageDraw.Draw(sr_image)
+    sr_image_draw.rectangle([(colStart,rowStart),(colEnd,rowEnd)], fill=None, outline='red')
+    sr_image = np.array(sr_image)
+
+    # get a binary mask of the attention
+    attention_pixels = attention_args[rowStart//4 : rowEnd//4 + 1, colStart//4 : colEnd//4 + 1]
+    attn_zeros = np.zeros((sr_image.shape[0], sr_image.shape[1], 1), dtype=np.uint8)
+    attn_bin_mask = np.copy(attn_zeros)
+    attn_bin_mask_ptr = np.ravel(attn_bin_mask)
+    for attn_pxl in attention_pixels.reshape(-1):
+        attn_bin_mask_ptr[4 * attn_pxl + 2] = 255
+    kernel = np.array([[0,1,1,1,0],
+                       [1,1,1,1,1],
+                       [1,1,1,1,1],
+                       [1,1,1,1,1],
+                       [0,1,1,1,0]
+                     ], np.uint8)
+    attn_bin_mask = cv2.dilate(attn_bin_mask, kernel)
+    attn_bin_mask = np.expand_dims(attn_bin_mask, axis=2)
+
+    attn_bin_mask_red = np.concatenate((attn_bin_mask, attn_zeros, attn_zeros), axis=2)
+    ref_image = np.maximum(ref_image, attn_bin_mask_red)
+
+    # concat final images
+    attn_bin_mask = np.concatenate((attn_bin_mask,attn_bin_mask,attn_bin_mask), axis=2)
+    # concat_image = np.concatenate((sr_image, ref_image, attn_bin_mask), axis=1)
+    concat_image = np.concatenate((sr_image, ref_image), axis=1)
+    return concat_image
 
 class Trainer():
     def __init__(self, args, logger, dataloader, model, loss_all):
@@ -319,11 +364,22 @@ class Trainer():
 
         self.model.eval()
         with torch.no_grad():
-            sr, _, _, _, _ = self.model(lr=LR_t, lrsr=LR_sr_t, ref=Ref_t, refsr=Ref_sr_t)
+            if not self.args.attention_visualize:
+                sr, _, _, _, _ = self.model(lr=LR_t, lrsr=LR_sr_t, ref=Ref_t, refsr=Ref_sr_t, return_attention=False)
+            else:
+                sr, _, S_args, _, _, _ = self.model(lr=LR_t, lrsr=LR_sr_t, ref=Ref_t, refsr=Ref_sr_t, return_attention=True)
             sr_save = (sr+1.) * 127.5
             sr_save = np.transpose(sr_save.squeeze().round().cpu().numpy(), (1, 2, 0)).astype(np.uint8)
             save_path = os.path.join(self.args.save_dir, 'save_results', os.path.basename(self.args.lr_path))
             imsave(save_path, sr_save)
+
+            if self.args.attention_visualize:
+                S_args = S_args.squeeze().cpu().numpy()
+                Ref_save = (Ref_t+1) * 127.5
+                Ref_save = np.transpose(Ref_save.squeeze().round().cpu().numpy(), (1, 2, 0)).astype(np.uint8)
+                attn_image = identify_attention(S_args, self.args.attention_roi, sr_save, Ref_save)
+                imsave(os.path.join(self.args.save_dir, 'save_results', os.path.basename(self.args.lr_path)[:-4] + "-attention.png"), attn_image)
+
             self.logger.info('output path: %s' %(save_path))
 
         self.logger.info('Test over.')
