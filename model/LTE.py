@@ -29,6 +29,8 @@ class LTE(torch.nn.Module):
             for param in self.slice3.parameters():
                 param.requires_grad = requires_grad
 
+        self.reduce_dimensionality = torch.nn.Conv2d(in_channels=256, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
+
         vgg_mean = (0.485, 0.456, 0.406)
         vgg_std = (0.229 * rgb_range, 0.224 * rgb_range, 0.225 * rgb_range)
         self.sub_mean = MeanShift(rgb_range, vgg_mean, vgg_std)
@@ -40,5 +42,6 @@ class LTE(torch.nn.Module):
         x = self.slice2(x)
         x_lv2 = x
         x = self.slice3(x)
+        x = self.reduce_dimensionality(x)
         x_lv3 = x
         return x_lv1, x_lv2, x_lv3

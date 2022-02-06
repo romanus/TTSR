@@ -71,14 +71,20 @@ class Trainer():
         if ((not self.args.cpu) and (self.args.num_gpu > 1)):
             self.vgg19 = nn.DataParallel(self.vgg19, list(range(self.args.num_gpu)))
 
+        # self.params = [
+        #     {"params": filter(lambda p: p.requires_grad, self.model.MainNet.parameters() if
+        #      args.num_gpu==1 else self.model.module.MainNet.parameters()),
+        #      "lr": args.lr_rate
+        #     },
+        #     {"params": filter(lambda p: p.requires_grad, self.model.LTE.parameters() if
+        #      args.num_gpu==1 else self.model.module.LTE.parameters()),
+        #      "lr": args.lr_rate_lte
+        #     }
+        # ]
         self.params = [
-            {"params": filter(lambda p: p.requires_grad, self.model.MainNet.parameters() if
-             args.num_gpu==1 else self.model.module.MainNet.parameters()),
+            {"params": filter(lambda p: p.requires_grad, self.model.parameters() if
+             args.num_gpu==1 else self.model.module.parameters()),
              "lr": args.lr_rate
-            },
-            {"params": filter(lambda p: p.requires_grad, self.model.LTE.parameters() if
-             args.num_gpu==1 else self.model.module.LTE.parameters()),
-             "lr": args.lr_rate_lte
             }
         ]
         self.optimizer = optim.Adam(self.params, betas=(args.beta1, args.beta2), eps=args.eps)
@@ -157,8 +163,8 @@ class Trainer():
 
     def train(self, current_epoch=0, is_init=False):
         self.model.train()
-        if (not is_init):
-            self.scheduler.step()
+        #if (not is_init):
+        #    self.scheduler.step()
         self.logger.info('Current epoch learning rate: %e' %(self.optimizer.param_groups[0]['lr']))
 
         dataloader = self.dataloader['train']

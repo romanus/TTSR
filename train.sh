@@ -12,7 +12,7 @@ python main.py --save_dir ./train/CUFED/TTSR \
                --lr_rate_lte 1e-5 \
                --rec_w 1 \
                --per_w 1e-2 \
-               --tpl_w 1e-2 \
+               --tpl_w 0 \
                --adv_w 1e-3 \
                --batch_size 6 \
                --num_init_epochs 2 \

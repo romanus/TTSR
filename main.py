@@ -1,7 +1,7 @@
 from option import args
 from utils import mkExpDir
 from dataset import dataloader
-from model import TTSR
+from model import TTSR, TTSR_IPT, TTSR_IPT2
 from loss.loss import get_loss_dict
 from trainer import Trainer
 
@@ -21,7 +21,9 @@ def main():
 
     ### device and model
     device = torch.device('cpu' if args.cpu else 'cuda')
-    _model = TTSR.TTSR(args).to(device)
+    #_model = TTSR.TTSR(args).to(device)
+    #_model = TTSR_IPT.TTSR_IPT(args).to(device)
+    _model = TTSR_IPT2.TTSR_IPT2(args).to(device)
     if ((not args.cpu) and (args.num_gpu > 1)):
         _model = nn.DataParallel(_model, list(range(args.num_gpu)))
 

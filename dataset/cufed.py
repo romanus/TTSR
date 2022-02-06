@@ -136,6 +136,7 @@ class TestSet(Dataset):
         HR = imread(self.input_list[idx])
         h, w = HR.shape[:2]
         h, w = h//4*4, w//4*4
+        h, w = min(h, 320), min(w, 320)
         HR = HR[:h, :w, :] ### crop to the multiple of 4
 
         ### LR and LR_sr
@@ -145,6 +146,7 @@ class TestSet(Dataset):
         ### Ref and Ref_sr
         Ref = imread(self.ref_list[idx])
         h2, w2 = Ref.shape[:2]
+        h2, w2 = min(h, h2), min(w, w2)
         h2, w2 = h2//4*4, w2//4*4
         Ref = Ref[:h2, :w2, :]
         Ref_sr = np.array(Image.fromarray(Ref).resize((w2//4, h2//4), Image.BICUBIC))
