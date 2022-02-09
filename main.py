@@ -1,7 +1,7 @@
 from option import args
 from utils import mkExpDir
 from dataset import dataloader
-from model import TTSR, TTSR_IPT, TTSR_IPT2
+from model import TTSR, TTSR_IPT, TTSR_IPT2, TTSR_IPT3
 from loss.loss import get_loss_dict
 from trainer import Trainer
 
@@ -11,6 +11,19 @@ import torch.nn as nn
 import warnings
 warnings.filterwarnings('ignore')
 
+from prettytable import PrettyTable
+
+def count_parameters(model):
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad: continue
+        param = parameter.numel()
+        table.add_row([name, param])
+        total_params+=param
+    print(table)
+    print(f"Total Trainable Params: {total_params}")
+    return total_params
 
 def main():
     ### make save_dir
@@ -23,7 +36,9 @@ def main():
     device = torch.device('cpu' if args.cpu else 'cuda')
     #_model = TTSR.TTSR(args).to(device)
     #_model = TTSR_IPT.TTSR_IPT(args).to(device)
-    _model = TTSR_IPT2.TTSR_IPT2(args).to(device)
+    # _model = TTSR_IPT2.TTSR_IPT2(args).to(device)
+    _model = TTSR_IPT3.TTSR_IPT3(args).to(device)
+    # count_parameters(_model)
     if ((not args.cpu) and (args.num_gpu > 1)):
         _model = nn.DataParallel(_model, list(range(args.num_gpu)))
 
