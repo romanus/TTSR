@@ -216,7 +216,6 @@ class Trainer():
                 sr, S, T_lv3, T_lv2, T_lv1 = self.model(lr=lr, lrsr=lr_sr, ref=ref, refsr=ref_sr)
 
                 ### calc loss
-                is_print = ((i_batch + 1) % self.args.print_every == 0) ### flag of print
                 iteration_idx = (current_epoch_absolute - 1) * logs_per_epoch + (i_batch + 1) // self.args.print_every
 
                 rec_loss = self.args.rec_w * self.loss_all['rec_loss'](sr, hr)
