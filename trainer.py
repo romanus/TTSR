@@ -254,7 +254,7 @@ class Trainer():
                         self.logger.info( 'adv_loss: %.10f' %(adv_loss_curr) )
                         self.writer.add_scalar("train/cum_adv_loss", adv_loss_cum / (i_batch + 1), iteration_idx)
             if (is_print):
-                self.writer.add_scalar("train/cum_total_loss", total_loss_cum / (i_batch + 1), iteration_idx)
+                self.writer.add_scalar("train/cum_total_loss", total_loss_cum / (i_batch + 1), iteration_idx_rec)
 
             loss.backward()
             self.optimizer.step()
@@ -274,6 +274,7 @@ class Trainer():
                 self.writer.add_scalar("train/cum_tpl_loss", tpl_loss_cum / len(dataloader), last_iteration_idx)
             if ('adv_loss' in self.loss_all):
                 self.writer.add_scalar("train/cum_adv_loss", adv_loss_cum / len(dataloader), last_iteration_idx)
+        self.writer.add_scalar("train/cum_total_loss", total_loss_cum / len(dataloader), last_iteration_idx_rec)
         if not is_init:
             self.visualize_inference_results(current_epoch)
         else:
