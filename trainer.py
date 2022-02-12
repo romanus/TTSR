@@ -6,6 +6,7 @@ import numpy as np
 from imageio import imread, imsave
 from PIL import Image, ImageDraw
 import cv2
+from tqdm import tqdm
 
 import torch
 import torch.nn as nn
@@ -199,65 +200,69 @@ class Trainer():
         tpl_loss_curr = 0.
         adv_loss_curr = 0.
 
-        for i_batch, sample_batched in enumerate(dataloader):
-            self.optimizer.zero_grad()
+        with tqdm(total=len(dataloader.dataset)) as pbar:
+            pbar.set_description("Epoch {}".format(current_epoch_absolute))
 
-            sample_batched = self.prepare(sample_batched)
-            lr = sample_batched['LR']
-            lr_sr = sample_batched['LR_sr']
-            hr = sample_batched['HR']
-            ref = sample_batched['Ref']
-            ref_sr = sample_batched['Ref_sr']
-            sr, S, T_lv3, T_lv2, T_lv1 = self.model(lr=lr, lrsr=lr_sr, ref=ref, refsr=ref_sr)
+            for i_batch, sample_batched in enumerate(dataloader):
+                self.optimizer.zero_grad()
 
-            ### calc loss
-            is_print = ((i_batch + 1) % self.args.print_every == 0) ### flag of print
-            iteration_idx = (current_epoch_absolute - 1) * logs_per_epoch + (i_batch + 1) // self.args.print_every
+                samples_count = sample_batched['LR'].shape[0]
+                sample_batched = self.prepare(sample_batched)
+                lr = sample_batched['LR']
+                lr_sr = sample_batched['LR_sr']
+                hr = sample_batched['HR']
+                ref = sample_batched['Ref']
+                ref_sr = sample_batched['Ref_sr']
+                sr, S, T_lv3, T_lv2, T_lv1 = self.model(lr=lr, lrsr=lr_sr, ref=ref, refsr=ref_sr)
 
-            rec_loss = self.args.rec_w * self.loss_all['rec_loss'](sr, hr)
-            rec_loss_curr = rec_loss.item()
-            rec_loss_cum += rec_loss_curr
-            total_loss_cum += rec_loss_curr
-            loss = rec_loss
-            if (is_print):
-                self.logger.info( ('init ' if is_init else '') + 'epoch: ' + str(current_epoch) +
-                    '\t batch: ' + str(i_batch+1) )
-            self.writer.add_scalar("train/cum_rec_loss", rec_loss_cum / (i_batch + 1), iteration_idx)
+                ### calc loss
+                is_print = ((i_batch + 1) % self.args.print_every == 0) ### flag of print
+                iteration_idx = (current_epoch_absolute - 1) * logs_per_epoch + (i_batch + 1) // self.args.print_every
 
-            if (not is_init):
-                if ('per_loss' in self.loss_all):
-                    sr_relu5_1 = self.vgg19((sr + 1.) / 2.)
-                    with torch.no_grad():
-                        hr_relu5_1 = self.vgg19((hr.detach() + 1.) / 2.)
-                    per_loss = self.args.per_w * self.loss_all['per_loss'](sr_relu5_1, hr_relu5_1)
-                    per_loss_curr = per_loss.item()
-                    per_loss_cum += per_loss_curr
-                    total_loss_cum += per_loss_curr
-                    loss += per_loss
-                    self.writer.add_scalar("train/cum_per_loss", per_loss_cum / (i_batch + 1), iteration_idx)
-                if ('tpl_loss' in self.loss_all):
-                    sr_lv1, sr_lv2, sr_lv3 = self.model(sr=sr)
-                    tpl_loss = self.args.tpl_w * self.loss_all['tpl_loss'](sr_lv3, sr_lv2, sr_lv1,
-                        S, T_lv3, T_lv2, T_lv1)
-                    tpl_loss_curr = tpl_loss.item()
-                    tpl_loss_cum = tpl_loss_curr
-                    total_loss_cum += tpl_loss_curr
-                    loss += tpl_loss
-                    self.writer.add_scalar("train/cum_tpl_loss", tpl_loss_cum / (i_batch + 1), iteration_idx)
-                if ('adv_loss' in self.loss_all):
-                    adv_loss = self.args.adv_w * self.loss_all['adv_loss'](sr, hr)
-                    adv_loss_curr = adv_loss.item()
-                    adv_loss_cum += adv_loss_curr
-                    total_loss_cum += adv_loss_curr
-                    loss += adv_loss
-                    self.writer.add_scalar("train/cum_adv_loss", adv_loss_cum / (i_batch + 1), iteration_idx)
+                rec_loss = self.args.rec_w * self.loss_all['rec_loss'](sr, hr)
+                rec_loss_curr = rec_loss.item()
+                rec_loss_cum += rec_loss_curr
+                total_loss_cum += rec_loss_curr
+                loss = rec_loss
+                self.writer.add_scalar("train/cum_rec_loss", rec_loss_cum / (i_batch + 1), iteration_idx)
 
-            self.writer.add_scalar("train/cum_total_loss", total_loss_cum / (i_batch + 1), iteration_idx)
+                if (not is_init):
+                    if ('per_loss' in self.loss_all):
+                        sr_relu5_1 = self.vgg19((sr + 1.) / 2.)
+                        with torch.no_grad():
+                            hr_relu5_1 = self.vgg19((hr.detach() + 1.) / 2.)
+                        per_loss = self.args.per_w * self.loss_all['per_loss'](sr_relu5_1, hr_relu5_1)
+                        per_loss_curr = per_loss.item()
+                        per_loss_cum += per_loss_curr
+                        total_loss_cum += per_loss_curr
+                        loss += per_loss
+                        self.writer.add_scalar("train/cum_per_loss", per_loss_cum / (i_batch + 1), iteration_idx)
+                    if ('tpl_loss' in self.loss_all):
+                        sr_lv1, sr_lv2, sr_lv3 = self.model(sr=sr)
+                        tpl_loss = self.args.tpl_w * self.loss_all['tpl_loss'](sr_lv3, sr_lv2, sr_lv1,
+                            S, T_lv3, T_lv2, T_lv1)
+                        tpl_loss_curr = tpl_loss.item()
+                        tpl_loss_cum = tpl_loss_curr
+                        total_loss_cum += tpl_loss_curr
+                        loss += tpl_loss
+                        self.writer.add_scalar("train/cum_tpl_loss", tpl_loss_cum / (i_batch + 1), iteration_idx)
+                    if ('adv_loss' in self.loss_all):
+                        adv_loss = self.args.adv_w * self.loss_all['adv_loss'](sr, hr)
+                        adv_loss_curr = adv_loss.item()
+                        adv_loss_cum += adv_loss_curr
+                        total_loss_cum += adv_loss_curr
+                        loss += adv_loss
+                        self.writer.add_scalar("train/cum_adv_loss", adv_loss_cum / (i_batch + 1), iteration_idx)
 
-            loss.backward()
-            self.optimizer.step()
+                total_loss_cum_logged = total_loss_cum / (i_batch + 1)
+                self.writer.add_scalar("train/cum_total_loss", total_loss_cum_logged, iteration_idx)
+                pbar.set_postfix(loss=total_loss_cum_logged, refresh=False)
+                pbar.update(samples_count)
 
-            self.writer.flush()
+                loss.backward()
+                self.optimizer.step()
+
+                self.writer.flush()
 
         # log end epoch losses
         last_iteration_idx = current_epoch_absolute * logs_per_epoch
