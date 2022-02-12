@@ -210,7 +210,8 @@ class MainNet(nn.Module):
         x11_res = x11
         x11_res = torch.cat((x11_res, T_lv3), dim=1)
         x11_res = self.conv11_head(x11_res) #F.relu(self.conv11_head(x11_res))
-        x11_res = x11_res * S
+        if S is not None:
+            x11_res = x11_res * S
         x11 = x11 + x11_res
 
         x11_res = x11
@@ -230,7 +231,8 @@ class MainNet(nn.Module):
         x22_res = x22
         x22_res = torch.cat((x22_res, T_lv2), dim=1)
         x22_res = self.conv22_head(x22_res) #F.relu(self.conv22_head(x22_res))
-        x22_res = x22_res * F.interpolate(S, scale_factor=2, mode='bicubic')
+        if S is not None:
+            x22_res = x22_res * F.interpolate(S, scale_factor=2, mode='bicubic')
         x22 = x22 + x22_res
 
         x22_res = x22
@@ -258,7 +260,8 @@ class MainNet(nn.Module):
         x33_res = x33
         x33_res = torch.cat((x33_res, T_lv1), dim=1)
         x33_res = self.conv33_head(x33_res) #F.relu(self.conv33_head(x33_res))
-        x33_res = x33_res * F.interpolate(S, scale_factor=4, mode='bicubic')
+        if S is not None:
+            x33_res = x33_res * F.interpolate(S, scale_factor=4, mode='bicubic')
         x33 = x33 + x33_res
 
         x33_res = x33
