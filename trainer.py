@@ -215,15 +215,17 @@ class Trainer():
                 ref_sr = sample_batched['Ref_sr']
                 sr, S, T_lv3, T_lv2, T_lv1 = self.model(lr=lr, lrsr=lr_sr, ref=ref, refsr=ref_sr)
 
-                ### calc loss
+                is_print = ((i_batch + 1) % self.args.print_every == 0) ### flag of print
                 iteration_idx = (current_epoch_absolute - 1) * logs_per_epoch + (i_batch + 1) // self.args.print_every
 
+                ### calc loss
                 rec_loss = self.args.rec_w * self.loss_all['rec_loss'](sr, hr)
                 rec_loss_curr = rec_loss.item()
                 rec_loss_cum += rec_loss_curr
                 total_loss_cum += rec_loss_curr
                 loss = rec_loss
-                self.writer.add_scalar("train/cum_rec_loss", rec_loss_cum / (i_batch + 1), iteration_idx)
+                if is_print:
+                    self.writer.add_scalar("train/cum_rec_loss", rec_loss_cum / (i_batch + 1), iteration_idx)
 
                 if (not is_init):
                     if ('per_loss' in self.loss_all):
@@ -235,7 +237,8 @@ class Trainer():
                         per_loss_cum += per_loss_curr
                         total_loss_cum += per_loss_curr
                         loss += per_loss
-                        self.writer.add_scalar("train/cum_per_loss", per_loss_cum / (i_batch + 1), iteration_idx)
+                        if is_print:
+                            self.writer.add_scalar("train/cum_per_loss", per_loss_cum / (i_batch + 1), iteration_idx)
                     if ('tpl_loss' in self.loss_all):
                         sr_lv1, sr_lv2, sr_lv3 = self.model(sr=sr)
                         tpl_loss = self.args.tpl_w * self.loss_all['tpl_loss'](sr_lv3, sr_lv2, sr_lv1,
@@ -244,18 +247,22 @@ class Trainer():
                         tpl_loss_cum = tpl_loss_curr
                         total_loss_cum += tpl_loss_curr
                         loss += tpl_loss
-                        self.writer.add_scalar("train/cum_tpl_loss", tpl_loss_cum / (i_batch + 1), iteration_idx)
+                        if is_print:
+                            self.writer.add_scalar("train/cum_tpl_loss", tpl_loss_cum / (i_batch + 1), iteration_idx)
                     if ('adv_loss' in self.loss_all):
                         adv_loss = self.args.adv_w * self.loss_all['adv_loss'](sr, hr)
                         adv_loss_curr = adv_loss.item()
                         adv_loss_cum += adv_loss_curr
                         total_loss_cum += adv_loss_curr
                         loss += adv_loss
-                        self.writer.add_scalar("train/cum_adv_loss", adv_loss_cum / (i_batch + 1), iteration_idx)
+                        if is_print:
+                            self.writer.add_scalar("train/cum_adv_loss", adv_loss_cum / (i_batch + 1), iteration_idx)
 
-                total_loss_cum_logged = total_loss_cum / (i_batch + 1)
-                self.writer.add_scalar("train/cum_total_loss", total_loss_cum_logged, iteration_idx)
-                pbar.set_postfix(loss=total_loss_cum_logged, refresh=False)
+                if is_print:
+                    total_loss_cum_logged = total_loss_cum / (i_batch + 1)
+                    self.writer.add_scalar("train/cum_total_loss", total_loss_cum_logged, iteration_idx)
+                    pbar.set_postfix(loss=total_loss_cum_logged, refresh=False)
+
                 pbar.update(samples_count)
 
                 loss.backward()
