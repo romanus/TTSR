@@ -23,15 +23,15 @@ class TTSR(nn.Module):
             sr_lv1, sr_lv2, sr_lv3 = self.LTE_copy((sr + 1.) / 2.)
             return sr_lv1, sr_lv2, sr_lv3
 
-        _, _, lrsr_lv3  = self.LTE((lrsr.detach() + 1.) / 2.)
+        lrsr_lv1, lrsr_lv2, lrsr_lv3  = self.LTE((lrsr.detach() + 1.) / 2.)
         _, _, refsr_lv3 = self.LTE((refsr.detach() + 1.) / 2.)
 
         ref_lv1, ref_lv2, ref_lv3 = self.LTE((ref.detach() + 1.) / 2.)
 
         if not return_attention:
-            S, T_lv3, T_lv2, T_lv1 = self.SearchTransfer(lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3, return_attention)
+            S, T_lv3, T_lv2, T_lv1 = self.SearchTransfer(lrsr_lv1, lrsr_lv2, lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3, return_attention)
         else:
-            S, S_args, T_lv3, T_lv2, T_lv1 = self.SearchTransfer(lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3, return_attention)
+            S, S_args, T_lv3, T_lv2, T_lv1 = self.SearchTransfer(lrsr_lv1, lrsr_lv2, lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3, return_attention)
 
         sr = self.MainNet(lr, S, T_lv3, T_lv2, T_lv1)
 
