@@ -71,22 +71,22 @@ class Trainer():
         if ((not self.args.cpu) and (self.args.num_gpu > 1)):
             self.vgg19 = nn.DataParallel(self.vgg19, list(range(self.args.num_gpu)))
 
-        # self.params = [
-        #     {"params": filter(lambda p: p.requires_grad, self.model.MainNet.parameters() if
-        #      args.num_gpu==1 else self.model.module.MainNet.parameters()),
-        #      "lr": args.lr_rate
-        #     },
-        #     {"params": filter(lambda p: p.requires_grad, self.model.LTE.parameters() if
-        #      args.num_gpu==1 else self.model.module.LTE.parameters()),
-        #      "lr": args.lr_rate_lte
-        #     }
-        # ]
         self.params = [
-            {"params": filter(lambda p: p.requires_grad, self.model.parameters() if
-             args.num_gpu==1 else self.model.module.parameters()),
+            {"params": filter(lambda p: p.requires_grad, self.model.MainNet.parameters() if
+             args.num_gpu==1 else self.model.module.MainNet.parameters()),
              "lr": args.lr_rate
+            },
+            {"params": filter(lambda p: p.requires_grad, self.model.LTE.parameters() if
+             args.num_gpu==1 else self.model.module.LTE.parameters()),
+             "lr": args.lr_rate_lte
             }
         ]
+        # self.params = [
+        #     {"params": filter(lambda p: p.requires_grad, self.model.parameters() if
+        #      args.num_gpu==1 else self.model.module.parameters()),
+        #      "lr": args.lr_rate
+        #     }
+        # ]
         self.optimizer = optim.Adam(self.params, betas=(args.beta1, args.beta2), eps=args.eps)
         self.scheduler = optim.lr_scheduler.StepLR(
             self.optimizer, step_size=self.args.decay, gamma=self.args.gamma)
@@ -147,6 +147,7 @@ class Trainer():
             for i_batch, train_batch in enumerate(train_dataloader):
                 train_prepared = self.prepare(train_batch)
                 train_sr, _, _, _, _ = self.model(lr=train_prepared['LR'], lrsr=train_prepared['LR_sr'], ref=train_prepared['Ref'], refsr=train_prepared['Ref_sr'])
+                train_sr = torch.clamp(train_sr, -1, 1)
                 self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_sr.cpu() + 1) * 127.5), current_epoch)
                 if i_batch + 1 == self.train_images_visualize:
                     break
@@ -155,6 +156,7 @@ class Trainer():
             for i_batch, test_batch in enumerate(test_dataloader):
                 test_prepared = self.prepare(test_batch)
                 test_sr, _, _, _, _ = self.model(lr=test_prepared['LR'], lrsr=test_prepared['LR_sr'], ref=test_prepared['Ref'], refsr=test_prepared['Ref_sr'])
+                test_sr = torch.clamp(test_sr, -1, 1)
                 self.writer.add_images('test/image{}'.format(i_batch), np.uint8((test_sr.cpu() + 1) * 127.5), current_epoch)
                 if i_batch + 1 == self.test_images_visualize:
                     break
@@ -163,8 +165,8 @@ class Trainer():
 
     def train(self, current_epoch=0, is_init=False):
         self.model.train()
-        #if (not is_init):
-        #    self.scheduler.step()
+        if (not is_init):
+            self.scheduler.step()
         self.logger.info('Current epoch learning rate: %e' %(self.optimizer.param_groups[0]['lr']))
 
         dataloader = self.dataloader['train']
@@ -304,6 +306,7 @@ class Trainer():
                     ref_sr = sample_batched['Ref_sr']
 
                     sr, _, _, _, _ = self.model(lr=lr, lrsr=lr_sr, ref=ref, refsr=ref_sr)
+                    sr = torch.clamp(sr, -1, 1)
                     if (self.args.eval_save_results):
                         sr_save = (sr+1.) * 127.5
                         sr_save = np.transpose(sr_save.squeeze().round().cpu().numpy(), (1, 2, 0)).astype(np.uint8)

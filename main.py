@@ -34,10 +34,10 @@ def main():
 
     ### device and model
     device = torch.device('cpu' if args.cpu else 'cuda')
-    #_model = TTSR.TTSR(args).to(device)
+    _model = TTSR.TTSR(args).to(device)
     #_model = TTSR_IPT.TTSR_IPT(args).to(device)
     # _model = TTSR_IPT2.TTSR_IPT2(args).to(device)
-    _model = TTSR_IPT3.TTSR_IPT3(args).to(device)
+    # _model = TTSR_IPT3.TTSR_IPT3(args).to(device)
     # count_parameters(_model)
     if ((not args.cpu) and (args.num_gpu > 1)):
         _model = nn.DataParallel(_model, list(range(args.num_gpu)))
@@ -57,8 +57,8 @@ def main():
         t.evaluate()
     else:
         current_epoch = 0
-        # current_epoch = 25
-        # t.load(model_path='./train/CUFED/TTSR/model/model_00025.pt')
+        # current_epoch = 30
+        # t.load(model_path='./train/CUFED/TTSR/model/model_00030.pt')
         # t.evaluate(current_epoch=current_epoch)
 
         for epoch in range(1, args.num_init_epochs+1):
