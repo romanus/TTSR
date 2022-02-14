@@ -16,7 +16,7 @@ python main.py --save_dir ./train/CUFED/TTSR \
                --adv_w 1e-3 \
                --batch_size 6 \
                --num_init_epochs 2 \
-               --num_epochs 60 \
+               --num_epochs 30 \
                --print_every 100 \
                --save_every 5 \
                --val_every 1

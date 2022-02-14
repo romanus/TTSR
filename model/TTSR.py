@@ -16,6 +16,8 @@ class TTSR(nn.Module):
         self.LTE_copy = LTE.LTE(requires_grad=False) ### used in transferal perceptual loss
         self.SearchTransfer = SearchTransfer.SearchTransfer()
 
+        self.reduce_dimensionality = nn.Conv2d(in_channels=256, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
+
     def forward(self, lr=None, lrsr=None, ref=None, refsr=None, sr=None, return_attention=False):
         if (type(sr) != type(None)):
             ### used in transferal perceptual loss
@@ -27,6 +29,10 @@ class TTSR(nn.Module):
         _, _, refsr_lv3 = self.LTE((refsr.detach() + 1.) / 2.)
 
         ref_lv1, ref_lv2, ref_lv3 = self.LTE((ref.detach() + 1.) / 2.)
+
+        lrsr_lv3 = self.reduce_dimensionality(lrsr_lv3)
+        refsr_lv3 = self.reduce_dimensionality(refsr_lv3)
+        ref_lv3 = self.reduce_dimensionality(ref_lv3)
 
         if not return_attention:
             S, T_lv3, T_lv2, T_lv1 = self.SearchTransfer(lrsr_lv1, lrsr_lv2, lrsr_lv3, refsr_lv3, ref_lv1, ref_lv2, ref_lv3, return_attention)
