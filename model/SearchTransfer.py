@@ -8,6 +8,10 @@ class SearchTransfer(nn.Module):
     def __init__(self):
         super(SearchTransfer, self).__init__()
 
+        self.w_qs = nn.Linear(576, 576, bias=False)
+        self.w_ks = nn.Linear(576, 576, bias=False)
+        #self.w_vs = nn.Linear(576, 576, bias=False)
+
     def bis(self, input, dim, index):
         # batch index select
         # input: [N, ?, ?, ...]
@@ -80,22 +84,22 @@ class SearchTransfer(nn.Module):
         # T_lv2_unfold      | Attention 2                | (*, 4608, 1600)
         # T_lv1_unfold      | Attention 3                | (*, 9216, 1600)
 
-        ### search
         lrsr_lv3_unfold  = F.unfold(lrsr_lv3, kernel_size=(3, 3), padding=1)
         refsr_lv3_unfold = F.unfold(refsr_lv3, kernel_size=(3, 3), padding=1)
-        refsr_lv3_unfold = refsr_lv3_unfold.transpose(1, 2)
+
+        lrsr_lv3_unfold = self.w_qs(lrsr_lv3_unfold.transpose(1, 2)).transpose(1, 2)
+        refsr_lv3_unfold = self.w_ks(refsr_lv3_unfold.transpose(1, 2)).transpose(1, 2)
 
         # Q*K^T
-        R_lv3 = torch.matmul(refsr_lv3_unfold, lrsr_lv3_unfold)
+        R_lv3 = torch.matmul(refsr_lv3_unfold.transpose(1, 2), lrsr_lv3_unfold)
 
         # (Q*K^T)/sqrt(d_k)
         embedding_dim = lrsr_lv3_unfold.size(1)
-        R_lv3 *= 1/ math.sqrt(embedding_dim)
+        R_lv3 *= 1/math.sqrt(embedding_dim)
 
         # softmax((Q*K^T)/sqrt(d_k))
-        R_lv3 = F.softmax(R_lv3, dim=-1)
+        R_lv3 = F.softmax(R_lv3, dim=1)
 
-        ### transfer
         ref_lv3_unfold = F.unfold(ref_lv3, kernel_size=(3, 3), padding=1)
         ref_lv2_unfold = F.unfold(ref_lv2, kernel_size=(6, 6), padding=2, stride=2)
         ref_lv1_unfold = F.unfold(ref_lv1, kernel_size=(12, 12), padding=4, stride=4)
