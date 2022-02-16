@@ -61,6 +61,8 @@ def main():
         # t.load(model_path='./train/CUFED/TTSR/model/model_00030.pt')
         # t.evaluate(current_epoch=current_epoch)
 
+        t.loadLTE(model_path='./train/CUFED/TTSR3-5/model/model_00030.pt')
+
         for epoch in range(1, args.num_init_epochs+1):
             t.train(current_epoch=epoch, is_init=True)
         for epoch in range(current_epoch + 1, args.num_epochs+1):

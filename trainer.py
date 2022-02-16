@@ -121,6 +121,15 @@ class Trainer():
             model_state_dict.update(model_state_dict_save)
             self.model.load_state_dict(model_state_dict)
 
+    def loadLTE(self, model_path=None):
+        if (model_path):
+            self.logger.info('load_model_path LTE: ' + model_path)
+            model_state_dict = self.model.state_dict()
+            for name, param in torch.load(model_path, map_location=self.device).items():
+                if name.startswith("LTE"):
+                    model_state_dict[name].copy_(param)
+            self.model.load_state_dict(model_state_dict)
+
     def prepare(self, sample_batched):
         for key in sample_batched.keys():
             sample_batched[key] = sample_batched[key].to(self.device)

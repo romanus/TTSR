@@ -7,6 +7,7 @@ python main.py --save_dir ./train/CUFED/TTSR \
                --dataset CUFED \
                --dataset_dir ./dataset/CUFED/ \
                --n_feats 64 \
+               --num_res_blocks 16+16+8+4 \
                --lr_rate 1e-4 \
                --lr_rate_dis 1e-4 \
                --lr_rate_lte 1e-5 \

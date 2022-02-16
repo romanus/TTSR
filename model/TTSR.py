@@ -12,7 +12,7 @@ class TTSR(nn.Module):
         self.num_res_blocks = list( map(int, args.num_res_blocks.split('+')) )
         self.MainNet = MainNet.MainNet(num_res_blocks=self.num_res_blocks, n_feats=args.n_feats,
             res_scale=args.res_scale)
-        self.LTE      = LTE.LTE(requires_grad=True)
+        self.LTE      = LTE.LTE(requires_grad=False)
         self.LTE_copy = LTE.LTE(requires_grad=False) ### used in transferal perceptual loss
         self.SearchTransfer = SearchTransfer.SearchTransfer()
 
