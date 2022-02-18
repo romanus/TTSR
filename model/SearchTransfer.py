@@ -12,6 +12,10 @@ class SearchTransfer(nn.Module):
         self.w_ks = nn.Linear(576, 576, bias=False)
         self.w_vs = nn.Linear(576, 576, bias=False)
 
+        self.normalize3 = nn.LayerNorm(576)
+        self.normalize2 = nn.LayerNorm(4608)
+        self.normalize1 = nn.LayerNorm(9216)
+
     def bis(self, input, dim, index):
         # batch index select
         # input: [N, ?, ?, ...]
@@ -110,6 +114,10 @@ class SearchTransfer(nn.Module):
         T_lv3_unfold = torch.matmul(ref_lv3_unfold, R_lv3)
         T_lv2_unfold = torch.matmul(ref_lv2_unfold, R_lv3)
         T_lv1_unfold = torch.matmul(ref_lv1_unfold, R_lv3)
+
+        T_lv3_unfold = self.normalize3(T_lv3_unfold.transpose(1, 2)).transpose(1, 2)
+        T_lv2_unfold = self.normalize2(T_lv2_unfold.transpose(1, 2)).transpose(1, 2)
+        T_lv1_unfold = self.normalize1(T_lv1_unfold.transpose(1, 2)).transpose(1, 2)
 
         T_lv3 = F.fold(T_lv3_unfold, output_size=lrsr_lv3.size()[-2:], kernel_size=(3,3), padding=1) / (3.*3.)
         T_lv2 = F.fold(T_lv2_unfold, output_size=(lrsr_lv3.size(2)*2, lrsr_lv3.size(3)*2), kernel_size=(6,6), padding=2, stride=2) / (3.*3.)
