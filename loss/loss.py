@@ -61,7 +61,7 @@ class TPerceptualLoss(nn.Module):
             loss_texture += F.mse_loss(map_lv2 * S_lv2, T_lv2 * S_lv2)
             loss_texture += F.mse_loss(map_lv1 * S_lv1, T_lv1 * S_lv1)
             loss_texture /= 3.
-        
+
         return loss_texture
 
 

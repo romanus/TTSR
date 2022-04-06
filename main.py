@@ -1,7 +1,7 @@
 from option import args
 from utils import mkExpDir
 from dataset import dataloader
-from model import TTSR, TTSR_IPT, TTSR_IPT2, TTSR_IPT3
+from model import TTSR
 from loss.loss import get_loss_dict
 from trainer import Trainer
 
@@ -35,9 +35,6 @@ def main():
     ### device and model
     device = torch.device('cpu' if args.cpu else 'cuda')
     _model = TTSR.TTSR(args).to(device)
-    #_model = TTSR_IPT.TTSR_IPT(args).to(device)
-    # _model = TTSR_IPT2.TTSR_IPT2(args).to(device)
-    # _model = TTSR_IPT3.TTSR_IPT3(args).to(device)
     # count_parameters(_model)
     if ((not args.cpu) and (args.num_gpu > 1)):
         _model = nn.DataParallel(_model, list(range(args.num_gpu)))
@@ -61,7 +58,7 @@ def main():
         # t.load(model_path='./train/CUFED/TTSR/model/model_00030.pt')
         # t.evaluate(current_epoch=current_epoch)
 
-        t.loadLTE(model_path='./train/CUFED/TTSR3-5/model/model_00030.pt')
+        # t.loadLTE(model_path='./train/CUFED/TTSR3-5/model/model_00030.pt')
 
         for epoch in range(1, args.num_init_epochs+1):
             t.train(current_epoch=epoch, is_init=True)

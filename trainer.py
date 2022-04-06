@@ -295,16 +295,16 @@ class Trainer():
 
         # save model
         if ((not is_init) and current_epoch % self.args.save_every == 0):
-            self.logger.info('saving the model...')
+            # self.logger.info('saving the model...')
             tmp = self.model.state_dict()
             model_state_dict = {key.replace('module.',''): tmp[key] for key in tmp if (('SearchNet' not in key) and ('_copy' not in key))}
             model_name = self.args.save_dir.strip('/')+'/model/model_'+str(current_epoch).zfill(5)+'.pt'
             torch.save(model_state_dict, model_name)
 
     def evaluate(self, current_epoch=0):
-        self.logger.info('Epoch ' + str(current_epoch) + ' evaluation process...')
+        # self.logger.info('Epoch ' + str(current_epoch) + ' evaluation process...')
 
-        if (self.args.dataset == 'CUFED' or self.args.dataset == 'ffhq'):
+        if (self.args.dataset == 'CUFED' or self.args.dataset == 'ffhq' or self.args.dataset == 'ffhq-masked'):
             self.model.eval()
             with torch.no_grad():
                 psnr, ssim, cnt = 0., 0., 0
@@ -345,7 +345,7 @@ class Trainer():
                 self.logger.info('Ref  PSNR (max): %.3f (%d) \t SSIM (max): %.4f (%d)'
                     %(self.max_psnr, self.max_psnr_epoch, self.max_ssim, self.max_ssim_epoch))
 
-        self.logger.info('Evaluation over.')
+        # self.logger.info('Evaluation over.')
 
     def test(self):
         self.logger.info('Test process...')
