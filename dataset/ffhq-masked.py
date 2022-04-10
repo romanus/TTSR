@@ -91,18 +91,15 @@ class TrainSet(Dataset):
     def __init__(self, args, transform=transforms.Compose([ToTensor()])):
 
         dataset_dir_src = os.path.join(args.dataset_dir, 'src')
-        dataset_dir_ref = os.path.join(args.dataset_dir, 'ref')
-        dataset_dir_gt = os.path.join(args.dataset_dir, 'ground-truth')
+        dataset_dir_gt = os.path.join(args.dataset_dir, 'gt')
 
         train_set, _ = train_test_split(dataset_dir_src)
         train_set = list(train_set)
 
         self.input_list = train_set
-        self.ref_list = copy.deepcopy(train_set)
         self.gt_list = copy.deepcopy(train_set)
 
         for i in range(len(train_set)):
-            self.ref_list[i] = self.ref_list[i].replace(dataset_dir_src, dataset_dir_ref)
             self.gt_list[i] = self.gt_list[i].replace(dataset_dir_src, dataset_dir_gt)
 
         self.transform = transform
@@ -111,7 +108,7 @@ class TrainSet(Dataset):
         return len(self.input_list)
 
     def __getitem__(self, idx):
-        sample = get_item(idx, self.input_list[idx], self.ref_list[idx], self.gt_list[idx])
+        sample = get_item(idx, self.input_list[idx], self.input_list[idx], self.gt_list[idx])
 
         if self.transform:
             sample = self.transform(sample)
@@ -122,18 +119,15 @@ class TestSet(Dataset):
     def __init__(self, args, transform=transforms.Compose([ToTensor()])):
 
         dataset_dir_src = os.path.join(args.dataset_dir, 'src')
-        dataset_dir_ref = os.path.join(args.dataset_dir, 'ref')
-        dataset_dir_gt = os.path.join(args.dataset_dir, 'ground-truth')
+        dataset_dir_gt = os.path.join(args.dataset_dir, 'gt')
 
         _, test_set = train_test_split(dataset_dir_src)
         test_set = list(test_set)
 
         self.input_list = test_set
-        self.ref_list = copy.deepcopy(test_set)
         self.gt_list = copy.deepcopy(test_set)
 
         for i in range(len(test_set)):
-            self.ref_list[i] = self.ref_list[i].replace(dataset_dir_src, dataset_dir_ref)
             self.gt_list[i] = self.gt_list[i].replace(dataset_dir_src, dataset_dir_gt)
 
         self.transform = transform
@@ -142,7 +136,7 @@ class TestSet(Dataset):
         return len(self.input_list)
 
     def __getitem__(self, idx):
-        sample = get_item(idx, self.input_list[idx], self.ref_list[idx], self.gt_list[idx])
+        sample = get_item(idx, self.input_list[idx], self.input_list[idx], self.gt_list[idx])
 
         if self.transform:
             sample = self.transform(sample)
