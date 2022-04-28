@@ -95,7 +95,6 @@ class TrainSet(Dataset):
 
         return sample
 
-
 class TestSet(Dataset):
     def __init__(self, args, transform=transforms.Compose([ToTensor()])):
 

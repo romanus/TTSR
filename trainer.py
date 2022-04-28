@@ -96,7 +96,7 @@ class Trainer():
         self.max_ssim = 0.
         self.max_ssim_epoch = 0
 
-        self.writer = SummaryWriter(comment=args.dataset)
+        self.writer = SummaryWriter(comment=args.model_gen)
         self.train_images_visualize = 3
         self.test_images_visualize = 6
         # self.writer.add_hparams(
