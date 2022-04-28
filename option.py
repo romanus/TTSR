@@ -118,5 +118,9 @@ parser.add_argument('--attention_roi', type=str, default="[0:0,0:0]",
 
 parser.add_argument('--model_gen', type=str, default="ttsr-raw",
                     help='ttsr-raw/ttsr-reduced/ttsr-soft-attention/ttsr-trainable-weights')
+parser.add_argument('--mask_rate', type=float, default=0.6,
+                    help='The number in [0,1] showing the rate of input images to be masked')
+parser.add_argument('--dataset_rate', type=float, default=1.0,
+                    help='The number in [0,1] showing the rate of input images to be used in training')
 
 args = parser.parse_args()

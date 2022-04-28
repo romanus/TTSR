@@ -137,15 +137,18 @@ class Trainer():
 
     def visualize_reference_images(self, epoch_to_log):
         train_dataloader = self.dataloader['train_no_shuffle']
-        for i_batch, train_batch in enumerate(train_dataloader):
-            self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_batch["HR"] + 1) * 127.5), epoch_to_log-1)
-            self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_batch["LR_sr"] + 1) * 127.5), epoch_to_log)
-            if i_batch + 1 == self.train_images_visualize:
-                break
+        if train_dataloader is not None:
+            for i_batch, train_batch in enumerate(train_dataloader):
+                self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_batch["HR"] + 1) * 127.5), epoch_to_log-2)
+                self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_batch["Ref"] + 1) * 127.5), epoch_to_log-1)
+                self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_batch["LR_sr"] + 1) * 127.5), epoch_to_log)
+                if i_batch + 1 == self.train_images_visualize:
+                    break
 
         test_dataloader = self.dataloader['test']['1']
         for i_batch, test_batch in enumerate(test_dataloader):
-            self.writer.add_images('test/image{}'.format(i_batch), np.uint8((test_batch["HR"] + 1) * 127.5), epoch_to_log-1)
+            self.writer.add_images('test/image{}'.format(i_batch), np.uint8((test_batch["HR"] + 1) * 127.5), epoch_to_log-2)
+            self.writer.add_images('test/image{}'.format(i_batch), np.uint8((test_batch["Ref"] + 1) * 127.5), epoch_to_log-1)
             self.writer.add_images('test/image{}'.format(i_batch), np.uint8((test_batch["LR_sr"] + 1) * 127.5), epoch_to_log)
             if i_batch + 1 == self.test_images_visualize:
                 break
@@ -154,13 +157,14 @@ class Trainer():
 
         with torch.no_grad():
             train_dataloader = self.dataloader['train_no_shuffle']
-            for i_batch, train_batch in enumerate(train_dataloader):
-                train_prepared = self.prepare(train_batch)
-                train_sr, _, _, _, _ = self.model(lr=train_prepared['LR'], lrsr=train_prepared['LR_sr'], ref=train_prepared['Ref'], refsr=train_prepared['Ref_sr'])
-                train_sr = torch.clamp(train_sr, -1, 1)
-                self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_sr.cpu() + 1) * 127.5), current_epoch)
-                if i_batch + 1 == self.train_images_visualize:
-                    break
+            if train_dataloader is not None:
+                for i_batch, train_batch in enumerate(train_dataloader):
+                    train_prepared = self.prepare(train_batch)
+                    train_sr, _, _, _, _ = self.model(lr=train_prepared['LR'], lrsr=train_prepared['LR_sr'], ref=train_prepared['Ref'], refsr=train_prepared['Ref_sr'])
+                    train_sr = torch.clamp(train_sr, -1, 1)
+                    self.writer.add_images('train/image{}'.format(i_batch), np.uint8((train_sr.cpu() + 1) * 127.5), current_epoch)
+                    if i_batch + 1 == self.train_images_visualize:
+                        break
 
             test_dataloader = self.dataloader['test']['1']
             for i_batch, test_batch in enumerate(test_dataloader):

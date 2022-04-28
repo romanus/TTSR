@@ -11,8 +11,6 @@ dst_resolution = 256
 # 60% of files are masked
 mask_rate = 0.6
 
-scales = [1.5, 1.45, 1.4, 1.35, 1.45, 1.5]
-
 if __name__ == '__main__':
     input_folder = os.path.join(".", "ztl", "train")
     input_mask_folder = os.path.join(".", "qd_imd", "train")
