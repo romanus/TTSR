@@ -1,5 +1,5 @@
 __pycache__
-dataset/ztl
+dataset/ztl*/
 dataset/CUFED
 dataset/ffhq*/
 dataset/qd_imd/

@@ -116,4 +116,7 @@ parser.add_argument('--attention_visualize', type=str2bool, default=False,
 parser.add_argument('--attention_roi', type=str, default="[0:0,0:0]",
                     help='[rowStart:rowEnd,colStart:colEnd]')
 
+parser.add_argument('--model_gen', type=str, default="ttsr-raw",
+                    help='ttsr-raw/ttsr-reduced/ttsr-soft-attention/ttsr-trainable-weights')
+
 args = parser.parse_args()

@@ -135,7 +135,7 @@ class MergeTail(nn.Module):
 
 
 class MainNet(nn.Module):
-    def __init__(self, num_res_blocks, n_feats, res_scale):
+    def __init__(self, in_channels, num_res_blocks, n_feats, res_scale):
         super(MainNet, self).__init__()
         self.num_res_blocks = num_res_blocks ### a list containing number of resblocks of different stages
         self.n_feats = n_feats
@@ -143,7 +143,7 @@ class MainNet(nn.Module):
         self.SFE = SFE(self.num_res_blocks[0], n_feats, res_scale)
 
         ### stage11
-        self.conv11_head = conv3x3(64+n_feats, n_feats)
+        self.conv11_head = conv3x3(in_channels+n_feats, n_feats)
         self.RB11 = nn.ModuleList()
         for i in range(self.num_res_blocks[1]):
             self.RB11.append(ResBlock(in_channels=n_feats, out_channels=n_feats,

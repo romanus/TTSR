@@ -5,8 +5,10 @@ from model import TTSR
 from loss.loss import get_loss_dict
 from trainer import Trainer
 
+import random
 import os
 import torch
+import numpy as np
 import torch.nn as nn
 import warnings
 warnings.filterwarnings('ignore')
@@ -25,7 +27,21 @@ def count_parameters(model):
     print(f"Total Trainable Params: {total_params}")
     return total_params
 
+# this function guarantees reproductivity
+# other packages also support seed options, you can add to this function
+def seed_everything(TORCH_SEED):
+	random.seed(TORCH_SEED)
+	os.environ['PYTHONHASHSEED'] = str(TORCH_SEED)
+	np.random.seed(TORCH_SEED)
+	torch.manual_seed(TORCH_SEED)
+	torch.cuda.manual_seed_all(TORCH_SEED)
+	torch.backends.cudnn.deterministic = True
+	torch.backends.cudnn.benchmark = False
+
 def main():
+
+    seed_everything(42)
+
     ### make save_dir
     _logger = mkExpDir(args)
 
