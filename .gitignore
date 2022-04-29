@@ -8,3 +8,4 @@ test/demo/output/
 train/
 eval/
 /runs*/
+.env/
