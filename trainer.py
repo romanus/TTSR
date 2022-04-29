@@ -98,7 +98,7 @@ class Trainer():
 
         self.writer = SummaryWriter(comment=args.model_gen)
         self.train_images_visualize = 3
-        self.test_images_visualize = 6
+        self.test_images_visualize = 9
         # self.writer.add_hparams(
         #     hparam_dict=
         #     {
@@ -308,7 +308,7 @@ class Trainer():
     def evaluate(self, current_epoch=0):
         # self.logger.info('Epoch ' + str(current_epoch) + ' evaluation process...')
 
-        if (self.args.dataset == 'CUFED' or self.args.dataset == 'ffhq' or self.args.dataset == 'ffhq-masked' or self.args.dataset == 'ztl-masked'):
+        if self.args.dataset in['CUFED', 'ffhq', 'ffhq-masked', 'ztl-masked', 'ztl']:
             self.model.eval()
             with torch.no_grad():
                 psnr, ssim, cnt = 0., 0., 0

@@ -18,6 +18,7 @@ dst_resolution = 256
 
 def get_item(input_image_path, reference_image_path, mask_image_path, input_rect, reference_rect):
 
+    # improve input_image to the quality of ref_image
     input_image = imread(input_image_path)
     ref_image = imread(reference_image_path)
 
@@ -151,6 +152,7 @@ class TestSet(Dataset):
         self.random_generator = random.Random(42)
 
         self.input_list = get_aligned_pairs(os.path.join(args.dataset_dir, 'test'))
+        self.random_generator.shuffle(self.input_list)
         self.input_list = self.input_list[0:int(len(self.input_list) * args.dataset_rate)]
 
         masks_folder = os.path.join(args.dataset_dir, 'qd_imd', 'test')
