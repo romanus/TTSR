@@ -4,7 +4,7 @@ from PIL import Image, ImageFilter
 import numpy as np
 import copy
 import random
-import threading
+import multiprocessing
 
 import torch
 from torch.utils.data import Dataset
@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 src_rows, src_cols = 1916, 3364
 dst_resolution = 256
 
-g_mutex = threading.Lock()
+g_mutex = multiprocessing.Lock()
 
 def get_item(input_image_path, reference_image_path, mask_image_path, input_rect, reference_rect):
 
