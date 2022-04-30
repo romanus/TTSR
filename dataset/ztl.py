@@ -4,6 +4,7 @@ from PIL import Image, ImageFilter
 import numpy as np
 import copy
 import random
+import threading
 
 import torch
 from torch.utils.data import Dataset
@@ -15,6 +16,8 @@ warnings.filterwarnings("ignore")
 
 src_rows, src_cols = 1916, 3364
 dst_resolution = 256
+
+g_mutex = threading.Lock()
 
 def get_item(input_image_path, reference_image_path, mask_image_path, input_rect, reference_rect):
 
@@ -132,12 +135,14 @@ class TrainSet(Dataset):
     def __getitem__(self, idx):
 
         input_image_path, reference_image_path = self.input_list[idx]
-        input_rect, reference_rect = generate_aligned_rects(self.random_generator)
 
-        mask_image_path = None
-        if self.random_generator.random() < self.mask_rate: # apply mask
-            mask_image_path = self.mask_paths_list[self.mask_idx]
-            self.mask_idx = (self.mask_idx + 1) % len(self.mask_paths_list)
+        with g_mutex:
+            input_rect, reference_rect = generate_aligned_rects(self.random_generator)
+
+            mask_image_path = None
+            if self.random_generator.random() < self.mask_rate: # apply mask
+                mask_image_path = self.mask_paths_list[self.mask_idx]
+                self.mask_idx = (self.mask_idx + 1) % len(self.mask_paths_list)
 
         sample = get_item(input_image_path, reference_image_path, mask_image_path, input_rect, reference_rect)
 

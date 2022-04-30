@@ -19,18 +19,18 @@ def get_dataloader(args):
         dataloader = {'train': dataloader_train, 'train_no_shuffle': dataloader_train_no_shuffle, 'test': dataloader_test}
     elif (args.dataset == 'ffhq' or args.dataset == 'ffhq-masked' or args.dataset == 'ztl-masked'):
         data_train = getattr(m, 'TrainSet')(args)
-        dataloader_train = DataLoader(data_train, batch_size=args.batch_size, shuffle=True, num_workers=1)
-        dataloader_train_no_shuffle = DataLoader(data_train, batch_size=1, shuffle=False, num_workers=1)
+        dataloader_train = DataLoader(data_train, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+        dataloader_train_no_shuffle = DataLoader(data_train, batch_size=1, shuffle=False, num_workers=args.num_workers)
         dataloader_test = {}
         data_test = getattr(m, 'TestSet')(args=args)
-        dataloader_test['1'] = DataLoader(data_test, batch_size=1, shuffle=False, num_workers=1)
+        dataloader_test['1'] = DataLoader(data_test, batch_size=1, shuffle=False, num_workers=args.num_workers)
         dataloader = {'train': dataloader_train, 'train_no_shuffle': None, 'test': dataloader_test}
     elif args.dataset == 'ztl':
         data_train = getattr(m, 'TrainSet')(args)
-        dataloader_train = DataLoader(data_train, batch_size=args.batch_size, shuffle=True, num_workers=1)
+        dataloader_train = DataLoader(data_train, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
         dataloader_test = {}
         data_test = getattr(m, 'TestSet')(args=args)
-        dataloader_test['1'] = DataLoader(data_test, batch_size=1, shuffle=False, num_workers=1)
+        dataloader_test['1'] = DataLoader(data_test, batch_size=1, shuffle=False, num_workers=args.num_workers)
         dataloader = {'train': dataloader_train, 'train_no_shuffle': None, 'test': dataloader_test}
     else:
         raise SystemExit('Error: no such type of dataset!')
