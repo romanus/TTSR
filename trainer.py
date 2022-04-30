@@ -213,7 +213,7 @@ class Trainer():
         tpl_loss_curr = 0.
         adv_loss_curr = 0.
 
-        with tqdm(total=len(dataloader.dataset), dynamic_ncols=True) as pbar:
+        with tqdm(total=len(dataloader.dataset), dynamic_ncols=True, ascii=True) as pbar:
             pbar.set_description("Epoch {}".format(current_epoch_absolute))
 
             for i_batch, sample_batched in enumerate(dataloader):

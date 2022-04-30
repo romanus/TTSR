@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     min_rows, min_cols = 10000, 10000
 
-    for dir in tqdm(os.listdir(input_folder)):
+    for dir in tqdm(os.listdir(input_folder), ascii=True):
 
         input_item_folder = os.path.join(input_folder, dir, 'aligned')
         for i in range(1, 6):
