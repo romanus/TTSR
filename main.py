@@ -70,14 +70,14 @@ def main():
         t.evaluate()
     else:
         current_epoch = 0
-        # current_epoch = 30
-        # t.load(model_path='./train/CUFED/TTSR/model/model_00030.pt')
+        # current_epoch = 500
+        # t.load(model_path='./train/ztl/ttsr-reduced/model/model_00500.pt')
+        # t.set_epoch(current_epoch=current_epoch)
         # t.evaluate(current_epoch=current_epoch)
 
-        # t.loadLTE(model_path='./train/CUFED/TTSR3-5/model/model_00030.pt')
-
-        for epoch in range(1, args.num_init_epochs+1):
-            t.train(current_epoch=epoch, is_init=True)
+        if current_epoch == 0:
+            for epoch in range(1, args.num_init_epochs+1):
+                t.train(current_epoch=epoch, is_init=True)
         for epoch in range(current_epoch + 1, args.num_epochs+1):
             t.train(current_epoch=epoch, is_init=False)
             if (epoch % args.val_every == 0):

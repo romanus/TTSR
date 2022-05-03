@@ -160,6 +160,13 @@ class TrainSet(Dataset):
 
         return sample
 
+    # set the random seed as if this number of epochs has passed
+    def __set_epoch__(self, current_epoch):
+        for epoch in range(current_epoch):
+            for _ in range(len(self)):
+                generate_aligned_rects(self.random_generator)
+                self.random_generator.random()
+
 class TestSet(Dataset):
     def __init__(self, args, transform=transforms.Compose([ToTensor()])):
 

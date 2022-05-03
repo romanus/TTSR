@@ -408,3 +408,9 @@ class Trainer():
             self.logger.info('output path: %s' %(save_path))
 
         self.logger.info('Test over.')
+
+    def set_epoch(self, current_epoch):
+
+        set_train_epoch = getattr(self.dataloader['train'].dataset, "__set_epoch__")
+        if callable(set_train_epoch):
+            set_train_epoch(current_epoch)
