@@ -70,6 +70,7 @@ def main():
         t.evaluate()
     else:
         current_epoch = 0
+        # t.load(model_path='./TTSR.pt')
         # current_epoch = 500
         # t.load(model_path='./train/ztl/ttsr-reduced/model/model_00500.pt')
         # t.set_epoch(current_epoch=current_epoch)
