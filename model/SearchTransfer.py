@@ -62,11 +62,15 @@ class SearchTransferSoftAttn(nn.Module):
         lrsr_lv3_unfold  = F.unfold(lrsr_lv3, kernel_size=(3, 3), padding=1)
         refsr_lv3_unfold = F.unfold(refsr_lv3, kernel_size=(3, 3), padding=1)
 
-        refsr_lv3_unfold = F.normalize(refsr_lv3_unfold, dim=2)
-        lrsr_lv3_unfold  = F.normalize(lrsr_lv3_unfold, dim=1)
-
         # Q*K^T
         R_lv3 = torch.matmul(refsr_lv3_unfold.transpose(1, 2), lrsr_lv3_unfold)
+
+        # (Q*K^T)/sqrt(d_k)
+        embedding_dim = lrsr_lv3_unfold.size(1)
+        R_lv3 *= 1/math.sqrt(embedding_dim)
+
+        # softmax((Q*K^T)/sqrt(d_k))
+        R_lv3 = F.softmax(R_lv3, dim=1)
 
         ref_lv3_unfold = F.unfold(ref_lv3, kernel_size=(3, 3), padding=1)
         ref_lv2_unfold = F.unfold(ref_lv2, kernel_size=(6, 6), padding=2, stride=2)
