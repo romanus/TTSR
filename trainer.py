@@ -120,9 +120,9 @@ class Trainer():
             model_state_dict = self.model.state_dict()
             model_state_dict.update(model_state_dict_save)
             if hasattr(self.model, "module"):
-                self.model.module.load_state_dict(model_state_dict)
+                self.model.module.load_state_dict(model_state_dict, strict=False)
             else:
-                self.model.load_state_dict(model_state_dict)
+                self.model.load_state_dict(model_state_dict, strict=False)
 
     def loadLTE(self, model_path=None):
         if (model_path):
