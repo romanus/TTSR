@@ -119,7 +119,10 @@ class Trainer():
             model_state_dict_save = {k:v for k,v in torch.load(model_path, map_location=self.device).items()}
             model_state_dict = self.model.state_dict()
             model_state_dict.update(model_state_dict_save)
-            self.model.load_state_dict(model_state_dict)
+            if hasattr(self.model, "module"):
+                self.model.module.load_state_dict(model_state_dict)
+            else:
+                self.model.load_state_dict(model_state_dict)
 
     def loadLTE(self, model_path=None):
         if (model_path):
