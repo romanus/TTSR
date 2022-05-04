@@ -80,14 +80,14 @@ def get_aligned_pairs(dataset_path):
 
             aligned_pairs.append((input_image_path, ref_image_path))
 
-        for i in range(1, 5):
-            ref_image_path = os.path.join(dataset_item_folder, "0000{}.JPG".format(i))
-            input_image_path = os.path.join(dataset_item_folder, "0000{}.JPG".format(i+2))
+        # for i in range(1, 5):
+        #     ref_image_path = os.path.join(dataset_item_folder, "0000{}.JPG".format(i))
+        #     input_image_path = os.path.join(dataset_item_folder, "0000{}.JPG".format(i+2))
 
-            if not (os.path.exists(ref_image_path) and os.path.exists(input_image_path)):
-                break
+        #     if not (os.path.exists(ref_image_path) and os.path.exists(input_image_path)):
+        #         break
 
-            aligned_pairs.append((input_image_path, ref_image_path))
+        #     aligned_pairs.append((input_image_path, ref_image_path))
 
     return aligned_pairs
 
